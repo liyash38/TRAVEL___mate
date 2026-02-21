@@ -4,11 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>TRAVEL_MATE — College Project</title>
-
 <style>
   *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif}
   body{background:#071126;color:#e6f0fb;min-height:100vh;display:flex;flex-direction:column}
-  /* NAV */
   nav{background:#062033;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.03)}
   .brand{font-weight:900;color:#facc15;font-size:20px}
   .brand span{color:#38bdf8}
@@ -26,10 +24,8 @@
   button.btn{display:inline-block;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;background:#facc15;color:#071126;font-weight:700}
   .muted{color:#b7d6ea;font-size:13px}
   .center{display:flex;align-items:center;gap:8px}
-  /* layout sections */
   #packagesSection, #bookingsSection, #reviewsSection, #profileSection{display:none}
   .visible{display:block}
-  /* bookings table */
   .booking-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
   .booking-row{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
   .booking-info{display:flex;flex-direction:column;gap:6px}
@@ -37,56 +33,52 @@
   .status-pending{background:#07345a;color:#bfe1ff}
   .status-completed{background:#0b3f1a;color:#bff0c9}
   .status-cancelled{background:#4a1b1b;color:#ffd6d6}
-  /* modal */
   .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:flex;align-items:center;justify-content:center;z-index:100}
   .modal{background:#061322;padding:18px;border-radius:12px;max-width:520px;width:92%}
   .modal h3{margin-bottom:8px}
   .row{display:flex;gap:10px;align-items:center}
   footer{background:#03111b;padding:16px 20px;text-align:center;color:#9fc9e5;margin-top:18px}
   .footer-email{font-weight:700;color:#dff1ff}
-  /* small */
   .actions{display:flex;gap:8px;align-items:center}
   .small{font-size:13px;color:#cbeafc}
   .empty{padding:18px;background:rgba(255,255,255,0.02);border-radius:10px;text-align:center;color:#9fc9e5}
   @media (max-width:520px){.nav-items{flex-wrap:wrap}}
+  .notice { background:#062b3b;padding:10px;border-radius:8px;margin-bottom:12px;color:#bfe1ff }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="brand">Travel <span>Mate</span></div>
   <div class="nav-items">
     <button onclick="showSection('packages')">Home</button>
     <button onclick="showSection('bookings')">My Bookings</button>
     <button onclick="showSection('reviews')">Reviews</button>
-    <button id="profileBtn" onclick="showSection('profile')">Profile</button>
+    <button id="profileBtn" onclick="showSection('profile')" style="display:none">Profile</button>
     <button id="authBtn" class="primary" onclick="openLogin()">Login</button>
   </div>
 </nav>
 
-<!-- MAIN -->
 <main>
-  <!-- LOGIN / EMAIL OTP -->
   <section id="loginCard" class="card" style="max-width:420px;margin:0 auto 18px auto;padding:14px;display:none">
     <div style="padding:6px 2px">
       <div style="font-size:20px;font-weight:800;color:#facc15">Email OTP Login</div>
-      <div class="muted" style="margin-top:6px">Enter your email to receive a login link. (Uses Firebase Email Link sign-in)</div>
+      <div class="muted" style="margin-top:6px">Enter your email to receive a login link. (Passwordless)</div>
       <input id="loginEmail" type="email" placeholder="you@example.com" />
       <div style="display:flex;gap:10px;margin-top:10px">
         <button class="btn" onclick="sendOTP()">Send Login Link</button>
-        <button class="btn" style="background:#2b82a6;color:#eaf6ff" onclick="useTestAccount()">Use Test Account</button>
+        <button class="btn" style="background:#2b82a6;color:#eaf6ff" onclick="useTestAccount()">Use Local Demo</button>
       </div>
+      <div class="muted" style="margin-top:8px">If Firebase blocks writes due to rules / domain, data will be saved locally (demo mode).</div>
     </div>
   </section>
 
-  <!-- PACKAGES -->
   <section id="packagesSection" class="visible">
     <h2 class="section-title">Packages</h2>
+    <div id="globalNotice" class="notice" style="display:none"></div>
     <div class="grid" id="packagesGrid"></div>
   </section>
 
-  <!-- BOOKINGS -->
   <section id="bookingsSection">
     <h2 class="section-title">My Bookings</h2>
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
@@ -96,12 +88,11 @@
         <option value="completed">Completed</option>
         <option value="cancelled">Cancelled</option>
       </select>
-      <div class="muted">Bookings shown are from your account (email)</div>
+      <div class="muted">Bookings shown are from your account (email) or local demo data.</div>
     </div>
     <div id="bookingList" class="booking-list"></div>
   </section>
 
-  <!-- REVIEWS -->
   <section id="reviewsSection">
     <h2 class="section-title">Reviews</h2>
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
@@ -125,7 +116,6 @@
     </div>
   </section>
 
-  <!-- PROFILE -->
   <section id="profileSection">
     <h2 class="section-title">Profile</h2>
     <div class="card" style="padding:12px;max-width:480px">
@@ -140,22 +130,21 @@
   </section>
 </main>
 
-<!-- FOOTER -->
 <footer>
   <div>Questions? Contact us at <span class="footer-email">travelmate@gmail.com</span></div>
   <div class="muted small" style="margin-top:8px">College project — demo UI using Firebase</div>
 </footer>
 
-<!-- PACKAGE DETAILS / BOOKING MODAL -->
 <div id="modalRoot" style="display:none"></div>
 
-<!-- FIREBASE -->
+<!-- Firebase SDK (v8) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
 <script>
 /* ==========================
-   FIREBASE CONFIG (existing)
+   CONFIG - update only if needed
    ========================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBe9PPyqfs9Th7AGumhvT0u0fBW2e7__K8",
@@ -169,14 +158,15 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* EMAIL LINK SETTINGS (keep as provided; change if hosting elsewhere) */
+/* Use current origin for email-link redirect so dev/test + GitHub Pages both work.
+   IMPORTANT: make sure this origin is added to Firebase Authorized domains in console. */
 const actionCodeSettings = {
-  url: "https://liyash38.github.io/TRAVEL__mate/",
+  url: "https://liyash38.github.io/TRAVEL__mate/", // dynamic: matches current page
   handleCodeInApp: true
 };
 
 /* ==========================
-   APP DATA (packages)
+   PACKAGES (static demo data)
    ========================== */
 const packages = [
   { id: "maldives", name: "Maldives Escape", price: "₹75,000", img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=60", desc: "7 nights in a water villa, breakfast included, island transfers." },
@@ -189,12 +179,10 @@ const packages = [
 ];
 
 /* ==========================
-   UI UTILITIES
+   Helpers
    ========================== */
 const $ = id => document.getElementById(id);
-
 function showSection(name){
-  // hide login card always
   $("loginCard").style.display = "none";
   const sections = {
     packages: $("packagesSection"),
@@ -204,63 +192,66 @@ function showSection(name){
   };
   Object.values(sections).forEach(s => s.classList.remove("visible"));
   if(sections[name]) sections[name].classList.add("visible");
-  // special render hooks
   if(name === "bookings") loadUserBookings();
   if(name === "reviews") loadReviews();
   if(name === "packages") renderPackages();
   if(name === "profile") renderProfile();
 }
-
-/* ==========================
-   AUTH FLOW (Email Link)
-   ========================== */
-function openLogin(){
-  // show the login card
-  $("loginCard").style.display = "block";
-  showSection("packages");
+function showModal(html){
+  const root = $("modalRoot");
+  root.style.display = "block";
+  root.innerHTML = `<div class="modal-backdrop" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()">${typeof html==='string'?html:html.innerHTML}</div></div>`;
   window.scrollTo({top:0,behavior:"smooth"});
 }
+function closeModal(){ $("modalRoot").style.display="none"; $("modalRoot").innerHTML=""; }
+function setGlobalNotice(msg){ const n=$("globalNotice"); if(!msg){ n.style.display='none'; n.textContent=''; } else { n.style.display='block'; n.textContent = msg; } }
+
+/* ==========================
+   AUTH: Email-link + local demo fallback
+   ========================== */
+function openLogin(){ $("loginCard").style.display = "block"; showSection('packages'); window.scrollTo({top:0,behavior:"smooth"}); }
 function sendOTP(){
   const emailInput = $("loginEmail");
   const email = (emailInput.value||"").trim();
   if(!email) return alert("Please enter an email address.");
   auth.sendSignInLinkToEmail(email, actionCodeSettings)
-    .then(()=>{
-      localStorage.setItem("emailForSignIn", email);
-      alert("Login link sent to your email. Open it to complete sign-in.");
-      emailInput.value = "";
-    })
-    .catch(e=>alert("Error sending login link: "+e.message));
+    .then(()=>{ localStorage.setItem("emailForSignIn", email); alert("Login link sent. Open the link from the same device to sign in."); emailInput.value=""; })
+    .catch(e => {
+      console.error("sendSignInLinkToEmail:", e);
+      if(e.code === 'auth/unauthorized-domain') {
+        alert("Auth blocked: unauthorized domain. Add this origin to Firebase Authorized Domains: " + window.location.origin);
+        setGlobalNotice("Auth blocked: unauthorized domain. Add this origin to Firebase Authorized Domains in console.");
+      } else {
+        alert("Could not send login link: " + e.message);
+      }
+    });
 }
 
-// helpful for testing/demo without email link (not secure; only for demo)
+/* Local demo account (purely local; uses localStorage and won't touch Firestore) */
 function useTestAccount(){
   const demoEmail = "demo@example.com";
-  // create a pseudo-sign-in by using anonymous auth is not enabled; instead we'll fake a simple "session"
-  // For a real project enable a proper sign-in method. Here we prompt for a display name and set a minimal local session.
   localStorage.setItem("demoUserEmail", demoEmail);
   updateUIForUser({ email: demoEmail, isDemo: true });
-  alert("Test account active as "+demoEmail+". (Demo mode — no Firebase auth used)");
+  alert("Local demo active as " + demoEmail + ". Data may be stored locally if Firestore is blocked.");
 }
 
-/* Complete sign-in if opened via link */
-if (auth.isSignInWithEmailLink(window.location.href)) {
-  let email = localStorage.getItem("emailForSignIn");
-  if (!email) email = prompt("Please confirm your email for sign-in");
-  auth.signInWithEmailLink(email, window.location.href)
-    .then((result) => {
-      localStorage.removeItem("emailForSignIn");
-      alert("Login successful ✅");
-    })
-    .catch(e => alert("Could not sign you in: " + e.message));
-}
+/* Finish sign-in if opened via email link */
+try {
+  if (auth.isSignInWithEmailLink && auth.isSignInWithEmailLink(window.location.href)) {
+    let email = localStorage.getItem("emailForSignIn");
+    if (!email) email = prompt("Please confirm your email for sign-in (the same email you used)");
+    if (email) {
+      auth.signInWithEmailLink(email, window.location.href)
+        .then(()=>{ localStorage.removeItem("emailForSignIn"); alert("Login successful ✅"); })
+        .catch(e=>{ console.error("signInWithEmailLink:", e); alert("Sign-in failed: " + e.message); });
+    }
+  }
+} catch(err){ console.error("isSignInWithEmailLink check failed:", err); }
 
 /* Monitor auth state */
 auth.onAuthStateChanged(user => {
-  if (user) {
-    updateUIForUser({ email: user.email, isDemo: false });
-  } else {
-    // check demo fallback
+  if (user) updateUIForUser({ email: user.email, isDemo: false });
+  else {
     const demo = localStorage.getItem("demoUserEmail");
     if (demo) updateUIForUser({ email: demo, isDemo: true });
     else updateUIForUser(null);
@@ -272,41 +263,35 @@ function updateUIForUser(user){
   const profileBtn = $("profileBtn");
   if(!user){
     authBtn.textContent = "Login";
-    profileBtn.style.display = "inline-block";
+    authBtn.onclick = openLogin;
+    profileBtn.style.display = "none";
     $("userEmail").textContent = "";
-    // show packages by default
-    showSection("packages");
+    showSection('packages');
   } else {
     authBtn.textContent = "Logout";
     authBtn.onclick = logout;
-    $("userEmail").textContent = user.email || "Unknown user";
     profileBtn.style.display = "inline-block";
-    // auto-load bookings & reviews for logged-in user
+    $("userEmail").textContent = user.email || "Unknown user";
+    // Load user-specific data
     loadUserBookings();
     loadReviews();
     renderPackages();
   }
 }
-
-/* Logout function covers both real auth and demo mode */
 function logout(){
   const demo = localStorage.getItem("demoUserEmail");
   if(demo){
     localStorage.removeItem("demoUserEmail");
-    alert("Demo session cleared.");
+    alert("Local demo cleared.");
     updateUIForUser(null);
     location.reload();
     return;
   }
-  auth.signOut().then(()=> {
-    updateUIForUser(null);
-    alert("Logged out.");
-    location.reload();
-  }).catch(e=>alert(e.message));
+  auth.signOut().then(()=>{ updateUIForUser(null); alert("Logged out."); location.reload(); }).catch(e=>alert(e.message));
 }
 
 /* ==========================
-   RENDER PACKAGES & BOOKING FLOW
+   RENDER PACKAGES
    ========================== */
 function renderPackages(){
   const grid = $("packagesGrid");
@@ -329,14 +314,14 @@ function renderPackages(){
     `;
     grid.appendChild(el);
   });
-
-  // populate review package select
   const sel = $("reviewPackage");
   sel.innerHTML = `<option value="">Select a package (optional)</option>`;
   packages.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.name}</option>`);
 }
 
-/* show simple package details */
+/* ==========================
+   BOOKING FLOW (Firestore with local fallback)
+   ========================== */
 function showPackageDetails(id){
   const p = packages.find(x=>x.id===id);
   if(!p) return alert("Package not found");
@@ -351,14 +336,12 @@ function showPackageDetails(id){
   `);
 }
 
-/* open booking confirmation modal */
 function openBookingModal(id){
   const p = packages.find(x=>x.id===id);
   if(!p) return alert("Package not found");
   const dateInput = $(`date-${id}`);
   let chosenDate = dateInput ? dateInput.value : "";
-  const content = document.createElement("div");
-  content.innerHTML = `
+  showModal(`
     <h3>Confirm Booking</h3>
     <div style="margin-top:6px"><strong>${p.name}</strong></div>
     <div class="muted" style="margin-top:6px">${p.desc}</div>
@@ -371,16 +354,22 @@ function openBookingModal(id){
       <button class="btn" onclick="closeModal()">Cancel</button>
       <button class="btn" onclick="confirmBooking('${p.id}')">Confirm Booking</button>
     </div>
-  `;
-  showModal(content.innerHTML);
+  `);
 }
 
-/* confirm and save booking to Firestore */
+/* local fallback save for bookings */
+function saveBookingLocally(doc){
+  const key = "local_bookings";
+  const arr = JSON.parse(localStorage.getItem(key) || "[]");
+  arr.unshift(doc);
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+
+/* confirm booking: try Firestore, fallback to localStorage on permission error */
 function confirmBooking(packageId){
-  // check auth or demo
   const demo = localStorage.getItem("demoUserEmail");
   const currentUser = (auth.currentUser && auth.currentUser.email) || demo;
-  if(!currentUser) return alert("Please login first (or use Test Account) to make a booking.");
+  if(!currentUser) return alert("Please login first (or use Local Demo) to make a booking.");
 
   const dateVal = $("modalDate").value;
   if(!dateVal) return alert("Please choose a travel date.");
@@ -388,24 +377,36 @@ function confirmBooking(packageId){
   const pkg = packages.find(p=>p.id===packageId);
   if(!pkg) return alert("Invalid package.");
 
-  // Save booking with initial status 'pending'
-  db.collection("bookings").add({
+  const payload = {
     packageId: pkg.id,
     packageName: pkg.name,
     price: pkg.price,
     date: dateVal,
     user: currentUser,
     status: "pending",
+    createdAt: new Date().toISOString()
+  };
+
+  // Try Firestore first
+  db.collection("bookings").add({
+    ...payload,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   }).then(() => {
     closeModal();
-    alert("Booking saved ✅ (status: pending). View it in My Bookings.");
-    loadUserBookings(); // refresh
-  }).catch(e => alert("Booking failed: "+e.message));
+    alert("Booking saved to cloud (status: pending).");
+    loadUserBookings();
+  }).catch(e => {
+    console.error("Firestore booking failed:", e);
+    // If permission or network issue, fallback to localStorage
+    saveBookingLocally(payload);
+    closeModal();
+    alert("Booking saved locally (Firestore unavailable or blocked). It will appear only on this browser.");
+    loadUserBookings();
+  });
 }
 
 /* ==========================
-   BOOKINGS: load & render
+   LOAD & RENDER BOOKINGS (tries Firestore then local)
    ========================== */
 let cachedBookings = [];
 
@@ -417,20 +418,37 @@ function loadUserBookings(){
     return;
   }
 
-  // listen for realtime updates to the user's bookings
-  db.collection("bookings")
-    .where("user", "==", currentUser)
-    .orderBy("createdAt", "desc")
-    .onSnapshot(snapshot => {
-      cachedBookings = snapshot.docs.map(d => ({ id: d.id, ...(d.data()||{}) }));
-      renderBookings();
-    }, err => {
-      // if ordering by createdAt fails because missing index or null, fallback to non-ordered fetch
-      db.collection("bookings").where("user", "==", currentUser).get().then(snap => {
-        cachedBookings = snap.docs.map(d=>({ id:d.id, ...(d.data()||{}) }));
+  // Try realtime Firestore listener
+  try {
+    db.collection("bookings")
+      .where("user", "==", currentUser)
+      .orderBy("createdAt", "desc")
+      .onSnapshot(snapshot => {
+        cachedBookings = snapshot.docs.map(d => ({ id: d.id, ...(d.data()||{}) }));
         renderBookings();
-      }).catch(e=> $("bookingList").innerHTML = `<div class="empty">Failed to load bookings: ${e.message}</div>`);
-    });
+      }, err => {
+        console.warn("Realtime bookings failed:", err);
+        // fallback to simple get without order (or get local)
+        db.collection("bookings").where("user","==",currentUser).get()
+          .then(snap => {
+            cachedBookings = snap.docs.map(d=>({ id:d.id, ...(d.data()||{}) }));
+            renderBookings();
+          }).catch(e => {
+            console.error("Firestore get failed:", e);
+            // fallback to localStorage
+            const local = JSON.parse(localStorage.getItem("local_bookings") || "[]");
+            cachedBookings = local.filter(b => b.user === currentUser);
+            renderBookings();
+            setGlobalNotice("Showing local bookings only (Firestore blocked or rules prevent access).");
+          });
+      });
+  } catch(err){
+    console.error("loadUserBookings error:", err);
+    const local = JSON.parse(localStorage.getItem("local_bookings") || "[]");
+    cachedBookings = local.filter(b => b.user === currentUser);
+    renderBookings();
+    setGlobalNotice("Showing local bookings only (Firestore not available).");
+  }
 }
 
 function renderBookings(){
@@ -447,6 +465,8 @@ function renderBookings(){
     row.className = "booking-row";
     const status = (b.status || "pending");
     const statusClass = status === "pending" ? "status-pending" : status === "completed" ? "status-completed" : "status-cancelled";
+    // Friendly createdAt display
+    let createdDisplay = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().toLocaleString() : (typeof b.createdAt === 'string' ? new Date(b.createdAt).toLocaleString() : "—");
     row.innerHTML = `
       <div style="min-width:0" class="booking-info">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
@@ -454,7 +474,7 @@ function renderBookings(){
           <div class="muted">${b.price || ""}</div>
         </div>
         <div class="small">Travel Date: <strong>${b.date||'N/A'}</strong> • Booked by <strong>${b.user}</strong></div>
-        <div class="small">Booked on: <strong>${b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().toLocaleString() : (b.createdAt || '—')}</strong></div>
+        <div class="small">Booked on: <strong>${createdDisplay}</strong></div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
         <div class="badge ${statusClass}">${status.toUpperCase()}</div>
@@ -469,9 +489,8 @@ function renderBookings(){
   });
 }
 
-/* view booking details */
 function viewBookingDetails(id){
-  const b = cachedBookings.find(x=>x.id===id);
+  const b = cachedBookings.find(x=>x.id===id) || cachedBookings.find(x=>x.packageId===id);
   if(!b) return alert("Booking not found");
   showModal(`
     <h3>${b.packageName || b.packageId}</h3>
@@ -480,31 +499,154 @@ function viewBookingDetails(id){
     <div style="margin-top:10px" class="muted">Booked by: ${b.user}</div>
     <div style="margin-top:12px;text-align:right">
       <button class="btn" onclick="closeModal()">Close</button>
-      ${b.status === 'pending' ? `<button class="btn" style="background:#4a1b1b;color:#fff" onclick="cancelBooking('${id}')">Cancel Booking</button>` : ''}
+      ${(b.status === 'pending' && b.id) ? `<button class="btn" style="background:#4a1b1b;color:#fff" onclick="cancelBooking('${b.id}')">Cancel Booking</button>` : ''}
     </div>
   `);
 }
 
-/* cancel booking: we update status to 'cancelled' (keeps history) */
+/* Cancel booking: try Firestore update; if fails try localStorage update */
 function cancelBooking(id){
   if(!confirm("Are you sure you want to cancel this booking?")) return;
-  db.collection("bookings").doc(id).update({ status: "cancelled" })
-    .then(()=> { alert("Booking cancelled."); loadUserBookings(); closeModal(); })
-    .catch(e => alert("Failed to cancel: "+e.message));
+  // If id looks like a Firestore doc id and Firestore available, try to update
+  try {
+    db.collection("bookings").doc(id).update({ status: "cancelled" })
+      .then(()=>{ alert("Booking cancelled."); loadUserBookings(); closeModal(); })
+      .catch(e=>{
+        console.error("cancelBooking firestore failed:", e);
+        // fallback: update local
+        const local = JSON.parse(localStorage.getItem("local_bookings") || "[]");
+        const idx = local.findIndex(b => b.id === id || (b.packageId && b.packageId === id));
+        if(idx >= 0){ local[idx].status = "cancelled"; localStorage.setItem("local_bookings", JSON.stringify(local)); alert("Booking cancelled locally."); loadUserBookings(); closeModal(); }
+        else alert("Could not cancel booking (Firestore failed and no local copy found).");
+      });
+  } catch(err){
+    console.error("cancelBooking error:", err);
+    const local = JSON.parse(localStorage.getItem("local_bookings") || "[]");
+    const idx = local.findIndex(b => b.id === id || (b.packageId && b.packageId === id));
+    if(idx >= 0){ local[idx].status = "cancelled"; localStorage.setItem("local_bookings", JSON.stringify(local)); alert("Booking cancelled locally."); loadUserBookings(); closeModal(); }
+    else alert("Could not cancel booking.");
+  }
 }
 
-/* allow admin/user to mark completed — for demo we let user mark completed */
-function markCompleted(id){
-  db.collection("bookings").doc(id).update({ status: "completed" })
-    .then(()=>{ alert("Status set to completed."); loadUserBookings(); })
-    .catch(e=>alert(e.message));
+/* ==========================
+   REVIEWS: Firestore with fallback to localStorage
+   ========================== */
+function saveReviewLocally(doc){
+  const key = "local_reviews";
+  const arr = JSON.parse(localStorage.getItem(key) || "[]");
+  arr.unshift(doc);
+  localStorage.setItem(key, JSON.stringify(arr));
 }
 
-/* allow adding review for a booking (only if completed ideally) */
+function submitReview(){
+  const rating = parseInt($("reviewRating").value || 0,10);
+  const comment = $("reviewComment").value || "";
+  const packageId = $("reviewPackage").value || "";
+  const pkg = packages.find(p=>p.id===packageId) || {};
+  const demo = localStorage.getItem("demoUserEmail");
+  const currentUser = (auth.currentUser && auth.currentUser.email) || demo;
+  if(!currentUser) return alert("Please login first (or use Local Demo).");
+  if(!rating || rating<1 || rating>5) return alert("Rating must be between 1 and 5.");
+
+  const payload = {
+    packageId: pkg.id || null,
+    packageName: pkg.name || null,
+    rating,
+    comment,
+    user: currentUser,
+    createdAt: new Date().toISOString()
+  };
+
+  db.collection("reviews").add({
+    ...payload,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    $("reviewRating").value=""; $("reviewComment").value=""; $("reviewPackage").value="";
+    alert("Review submitted to cloud. Thank you!");
+    loadReviews();
+  }).catch(e=>{
+    console.error("submitReview firestore failed:", e);
+    saveReviewLocally(payload);
+    alert("Review saved locally (cloud unavailable).");
+    loadReviews();
+  });
+}
+
+function loadReviews(){
+  try {
+    db.collection("reviews").orderBy("createdAt","desc").limit(50).get()
+      .then(snap => {
+        const list = $("reviewsList");
+        if(snap.empty){ list.innerHTML = `<div class="empty">No reviews yet.</div>`; return; }
+        list.innerHTML = "";
+        snap.docs.forEach(doc => {
+          const r = doc.data();
+          const el = document.createElement("div");
+          el.className = "booking-row";
+          el.style.flexDirection = "column";
+          el.innerHTML = `
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%">
+              <div style="font-weight:800">${r.packageName || "General"}</div>
+              <div class="small">Rating: <strong>${r.rating}</strong></div>
+            </div>
+            <div class="muted" style="margin-top:6px">${r.comment || ""}</div>
+            <div class="small" style="margin-top:6px">By <strong>${r.user}</strong> • ${r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString() : ""}</div>
+          `;
+          list.appendChild(el);
+        });
+      }).catch(e=>{
+        console.error("loadReviews firestore failed:", e);
+        // fallback to local
+        const list = $("reviewsList");
+        const local = JSON.parse(localStorage.getItem("local_reviews") || "[]");
+        if(local.length === 0){ list.innerHTML = `<div class="empty">No reviews yet.</div>`; return; }
+        list.innerHTML = "";
+        local.forEach(r => {
+          const el = document.createElement("div");
+          el.className = "booking-row";
+          el.style.flexDirection = "column";
+          el.innerHTML = `
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%">
+              <div style="font-weight:800">${r.packageName || "General"}</div>
+              <div class="small">Rating: <strong>${r.rating}</strong></div>
+            </div>
+            <div class="muted" style="margin-top:6px">${r.comment || ""}</div>
+            <div class="small" style="margin-top:6px">By <strong>${r.user}</strong> • ${r.createdAt || ""}</div>
+          `;
+          list.appendChild(el);
+        });
+        setGlobalNotice("Showing local reviews only (Firestore not available).");
+      });
+  } catch(err){
+    console.error("loadReviews error:", err);
+    const list = $("reviewsList");
+    const local = JSON.parse(localStorage.getItem("local_reviews") || "[]");
+    if(local.length === 0){ list.innerHTML = `<div class="empty">No reviews yet.</div>`; return; }
+    list.innerHTML = "";
+    local.forEach(r => {
+      const el = document.createElement("div");
+      el.className = "booking-row"; el.style.flexDirection = "column";
+      el.innerHTML = `
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%">
+          <div style="font-weight:800">${r.packageName || "General"}</div>
+          <div class="small">Rating: <strong>${r.rating}</strong></div>
+        </div>
+        <div class="muted" style="margin-top:6px">${r.comment || ""}</div>
+        <div class="small" style="margin-top:6px">By <strong>${r.user}</strong> • ${r.createdAt || ""}</div>
+      `;
+      list.appendChild(el);
+    });
+    setGlobalNotice("Showing local reviews only (Firestore not available).");
+  }
+}
+
+/* ==========================
+   Booking-review helper: allow adding review for a completed booking (modal)
+   ========================== */
 function openAddReviewForBooking(bookingId){
-  const booking = cachedBookings.find(b=>b.id===bookingId);
+  const booking = cachedBookings.find(b=>b.id===bookingId) || cachedBookings.find(b=>b.packageId===bookingId);
   if(!booking) return alert("Booking not found");
-  const content = `
+  showModal(`
     <h3>Leave Review for ${booking.packageName}</h3>
     <div class="muted">Booking date: ${booking.date}</div>
     <div style="margin-top:10px">
@@ -517,127 +659,57 @@ function openAddReviewForBooking(bookingId){
       <button class="btn" onclick="closeModal()">Cancel</button>
       <button class="btn" onclick="submitReviewForBooking('${bookingId}')">Submit Review</button>
     </div>
-  `;
-  showModal(content);
+  `);
 }
+
 function submitReviewForBooking(bookingId){
   const rating = parseInt($("bookingReviewRating").value || 0,10);
   const comment = $("bookingReviewComment").value || "";
-  const booking = cachedBookings.find(b=>b.id===bookingId);
+  const booking = cachedBookings.find(b=>b.id===bookingId) || cachedBookings.find(b=>b.packageId===bookingId);
   if(!booking) return alert("Booking not found");
   const demo = localStorage.getItem("demoUserEmail");
   const currentUser = (auth.currentUser && auth.currentUser.email) || demo;
   if(!currentUser) return alert("Please login first.");
   if(!rating || rating<1 || rating>5) return alert("Please provide a rating 1-5.");
 
-  db.collection("reviews").add({
+  const payload = {
     bookingId,
     packageId: booking.packageId,
     packageName: booking.packageName,
     rating,
     comment,
     user: currentUser,
+    createdAt: new Date().toISOString()
+  };
+
+  db.collection("reviews").add({
+    ...payload,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   }).then(()=>{
-    alert("Thanks — your review has been submitted.");
+    alert("Thanks — your review has been submitted to cloud.");
     closeModal();
     loadReviews();
-  }).catch(e=>alert("Failed to submit review: "+e.message));
-}
-
-/* ==========================
-   REVIEWS: submit & load
-   ========================== */
-function submitReview(){
-  const rating = parseInt($("reviewRating").value || 0,10);
-  const comment = $("reviewComment").value || "";
-  const packageId = $("reviewPackage").value || "";
-  const pkg = packages.find(p=>p.id===packageId) || {};
-  const demo = localStorage.getItem("demoUserEmail");
-  const currentUser = (auth.currentUser && auth.currentUser.email) || demo;
-  if(!currentUser) return alert("Please login first (or use Test Account).");
-  if(!rating || rating<1 || rating>5) return alert("Rating must be between 1 and 5.");
-  db.collection("reviews").add({
-    packageId: pkg.id || null,
-    packageName: pkg.name || null,
-    rating,
-    comment,
-    user: currentUser,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>{
-    $("reviewRating").value = "";
-    $("reviewComment").value = "";
-    $("reviewPackage").value = "";
-    alert("Review submitted. Thank you!");
+  }).catch(e=>{
+    console.error("submitReviewForBooking failed:", e);
+    saveReviewLocally(payload);
+    alert("Review saved locally (cloud unavailable).");
+    closeModal();
     loadReviews();
-  }).catch(e=>alert("Failed to submit review: "+e.message));
-}
-
-function loadReviews(){
-  // show latest reviews
-  db.collection("reviews").orderBy("createdAt","desc").limit(50).get()
-    .then(snap => {
-      const list = $("reviewsList");
-      if(snap.empty){ list.innerHTML = `<div class="empty">No reviews yet.</div>`; return; }
-      list.innerHTML = "";
-      snap.docs.forEach(doc => {
-        const r = doc.data();
-        const el = document.createElement("div");
-        el.className = "booking-row";
-        el.style.flexDirection = "column";
-        el.innerHTML = `
-          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%">
-            <div style="font-weight:800">${r.packageName || "General"}</div>
-            <div class="small">Rating: <strong>${r.rating}</strong></div>
-          </div>
-          <div class="muted" style="margin-top:6px">${r.comment || ""}</div>
-          <div class="small" style="margin-top:6px">By <strong>${r.user}</strong> • ${r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString() : ""}</div>
-        `;
-        list.appendChild(el);
-      });
-    })
-    .catch(e => {
-      $("reviewsList").innerHTML = `<div class="empty">Failed to load reviews: ${e.message}</div>`;
-    });
+  });
 }
 
 /* ==========================
-   PROFILE RENDER
+   PROFILE
    ========================== */
-function renderProfile(){
-  const demo = localStorage.getItem("demoUserEmail");
-  const email = (auth.currentUser && auth.currentUser.email) || demo;
-  $("userEmail").textContent = email || "Not signed in";
-}
+function renderProfile(){ const demo = localStorage.getItem("demoUserEmail"); const email = (auth.currentUser && auth.currentUser.email) || demo; $("userEmail").textContent = email || "Not signed in"; }
 
 /* ==========================
-   MODAL HELPERS
-   ========================== */
-function showModal(html){
-  const root = $("modalRoot");
-  root.style.display = "block";
-  root.innerHTML = `
-    <div class="modal-backdrop" onclick="closeModal()">
-      <div class="modal" onclick="event.stopPropagation()">
-        ${typeof html === "string" ? html : html.innerHTML}
-      </div>
-    </div>
-  `;
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-function closeModal(){ $("modalRoot").style.display = "none"; $("modalRoot").innerHTML = ""; }
-
-/* ==========================
-   ON LOAD
+   INIT
    ========================== */
 document.addEventListener("DOMContentLoaded", ()=>{
   renderPackages();
-  // show login card if not signed in
-  if(!auth.currentUser && !localStorage.getItem("demoUserEmail")){
-    // keep login hidden; user can click Login
-    $("loginCard").style.display = "none";
-  }
-  // hook auth button default (for unauthenticated)
+  // hide login by default (user can open)
+  $("loginCard").style.display = "none";
   $("authBtn").onclick = openLogin;
 });
 </script>
