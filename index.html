@@ -1,78 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>TRAVEL_MATE</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TRAVEL_MATE — College Project</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#000;color:#fff}
-.login-page{
- min-height:100vh;
- background:url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1800&q=80") center/cover no-repeat;
- display:flex;align-items:center;justify-content:center;
-}
-.login-card{
- background:rgba(0,0,0,.8);
- width:360px;padding:30px;border-radius:18px;text-align:center;
-}
-.logo{font-size:32px;font-weight:900;color:#facc15}
-.logo span{color:#38bdf8}
-input{width:100%;padding:12px;margin:8px 0;border:none;border-radius:8px}
-button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:25px;
- background:#facc15;font-weight:700;cursor:pointer}
-#site{display:none}
-nav{
- background:#020617;padding:16px 30px;
- display:flex;justify-content:space-between;align-items:center
-}
-nav ul{list-style:none;display:flex;gap:25px}
-.section{max-width:1200px;margin:auto;padding:60px 20px}
-.packages{
- display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:25px
-}
-.card{
- background:#020617;border-radius:16px;overflow:hidden;
- transition:.3s
-}
-.card:hover{transform:translateY(-6px)}
-.card img{width:100%;height:180px;object-fit:cover}
-.card div{padding:16px}
-.price{color:#facc15;font-weight:700}
+  *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,Helvetica,sans-serif}
+  body{background:#071126;color:#e6f0fb;min-height:100vh;display:flex;flex-direction:column}
+  /* NAV */
+  nav{background:#062033;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .brand{font-weight:900;color:#facc15;font-size:20px}
+  .brand span{color:#38bdf8}
+  .nav-items{display:flex;gap:12px;align-items:center}
+  .nav-items button{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:8px 12px;border-radius:8px;cursor:pointer}
+  .nav-items button.primary{background:#facc15;color:#031026;border:none;font-weight:700}
+  main{flex:1;max-width:1100px;margin:28px auto;padding:0 18px;width:100%}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;overflow:hidden;box-shadow:0 6px 18px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+  .card img{width:100%;height:160px;object-fit:cover;display:block}
+  .card-body{padding:14px}
+  h2.section-title{margin-bottom:12px;color:#dff1ff}
+  .price{color:#facc15;font-weight:800;margin:8px 0}
+  input[type="date"], input[type="email"], textarea, select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;margin-top:8px}
+  button.btn{display:inline-block;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;background:#facc15;color:#071126;font-weight:700}
+  .muted{color:#b7d6ea;font-size:13px}
+  .center{display:flex;align-items:center;gap:8px}
+  /* layout sections */
+  #packagesSection, #bookingsSection, #reviewsSection, #profileSection{display:none}
+  .visible{display:block}
+  /* bookings table */
+  .booking-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+  .booking-row{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .booking-info{display:flex;flex-direction:column;gap:6px}
+  .badge{padding:6px 8px;border-radius:8px;font-weight:700;font-size:13px}
+  .status-pending{background:#07345a;color:#bfe1ff}
+  .status-completed{background:#0b3f1a;color:#bff0c9}
+  .status-cancelled{background:#4a1b1b;color:#ffd6d6}
+  /* modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:flex;align-items:center;justify-content:center;z-index:100}
+  .modal{background:#061322;padding:18px;border-radius:12px;max-width:520px;width:92%}
+  .modal h3{margin-bottom:8px}
+  .row{display:flex;gap:10px;align-items:center}
+  footer{background:#03111b;padding:16px 20px;text-align:center;color:#9fc9e5;margin-top:18px}
+  .footer-email{font-weight:700;color:#dff1ff}
+  /* small */
+  .actions{display:flex;gap:8px;align-items:center}
+  .small{font-size:13px;color:#cbeafc}
+  .empty{padding:18px;background:rgba(255,255,255,0.02);border-radius:10px;text-align:center;color:#9fc9e5}
+  @media (max-width:520px){.nav-items{flex-wrap:wrap}}
 </style>
 </head>
-
 <body>
 
-<div class="login-page" id="loginPage">
- <div class="login-card">
-  <div class="logo">Travel <span>Mate</span></div>
-  <h2>Email OTP Login</h2>
-  <input id="email" placeholder="Enter Email">
-  <button onclick="sendOTP()">Send Login Link</button>
- </div>
-</div>
-
-<div id="site">
+<!-- NAV -->
 <nav>
- <div class="logo">Travel <span>Mate</span></div>
- <ul>
-  <li onclick="logout()" style="cursor:pointer">Logout</li>
- </ul>
+  <div class="brand">Travel <span>Mate</span></div>
+  <div class="nav-items">
+    <button onclick="showSection('packages')">Home</button>
+    <button onclick="showSection('bookings')">My Bookings</button>
+    <button onclick="showSection('reviews')">Reviews</button>
+    <button id="profileBtn" onclick="showSection('profile')">Profile</button>
+    <button id="authBtn" class="primary" onclick="openLogin()">Login</button>
+  </div>
 </nav>
 
-<div class="section">
- <h2>Packages</h2><br>
- <div class="packages" id="packages"></div>
-</div>
-</div>
+<!-- MAIN -->
+<main>
+  <!-- LOGIN / EMAIL OTP -->
+  <section id="loginCard" class="card" style="max-width:420px;margin:0 auto 18px auto;padding:14px;display:none">
+    <div style="padding:6px 2px">
+      <div style="font-size:20px;font-weight:800;color:#facc15">Email OTP Login</div>
+      <div class="muted" style="margin-top:6px">Enter your email to receive a login link. (Uses Firebase Email Link sign-in)</div>
+      <input id="loginEmail" type="email" placeholder="you@example.com" />
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn" onclick="sendOTP()">Send Login Link</button>
+        <button class="btn" style="background:#2b82a6;color:#eaf6ff" onclick="useTestAccount()">Use Test Account</button>
+      </div>
+    </div>
+  </section>
 
+  <!-- PACKAGES -->
+  <section id="packagesSection" class="visible">
+    <h2 class="section-title">Packages</h2>
+    <div class="grid" id="packagesGrid"></div>
+  </section>
+
+  <!-- BOOKINGS -->
+  <section id="bookingsSection">
+    <h2 class="section-title">My Bookings</h2>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <select id="filterStatus" onchange="renderBookings()" style="max-width:220px">
+        <option value="all">All statuses</option>
+        <option value="pending">Pending</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <div class="muted">Bookings shown are from your account (email)</div>
+    </div>
+    <div id="bookingList" class="booking-list"></div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviewsSection">
+    <h2 class="section-title">Reviews</h2>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+      <div style="flex:1;min-width:260px" class="card">
+        <div class="card-body">
+          <div class="muted">Leave a public review</div>
+          <select id="reviewPackage">
+            <option value="">Select a package (or leave blank)</option>
+          </select>
+          <input id="reviewRating" placeholder="Rating (1-5)" type="number" min="1" max="5" />
+          <textarea id="reviewComment" rows="3" placeholder="Write your review..."></textarea>
+          <div style="margin-top:8px"><button class="btn" onclick="submitReview()">Submit Review</button></div>
+        </div>
+      </div>
+      <div style="flex:2;min-width:260px" class="card">
+        <div class="card-body">
+          <div class="muted">Community reviews</div>
+          <div id="reviewsList" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="profileSection">
+    <h2 class="section-title">Profile</h2>
+    <div class="card" style="padding:12px;max-width:480px">
+      <div class="card-body">
+        <div class="muted">Signed in as:</div>
+        <div id="userEmail" style="font-weight:800;margin-top:6px"></div>
+        <div style="margin-top:12px">
+          <button class="btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div>Questions? Contact us at <span class="footer-email">travelmate@gmail.com</span></div>
+  <div class="muted small" style="margin-top:8px">College project — demo UI using Firebase</div>
+</footer>
+
+<!-- PACKAGE DETAILS / BOOKING MODAL -->
+<div id="modalRoot" style="display:none"></div>
+
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
 <script>
+/* ==========================
+   FIREBASE CONFIG (existing)
+   ========================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBe9PPyqfs9Th7AGumhvT0u0fBW2e7__K8",
   authDomain: "travelmate-7c433.firebaseapp.com",
@@ -81,98 +165,481 @@ const firebaseConfig = {
   messagingSenderId: "452266842172",
   appId: "1:452266842172:web:a93a82e3d3c3b87447cb39"
 };
-
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* EMAIL LINK SETTINGS */
+/* EMAIL LINK SETTINGS (keep as provided; change if hosting elsewhere) */
 const actionCodeSettings = {
   url: "https://liyash38.github.io/TRAVEL__mate/",
-
   handleCodeInApp: true
 };
 
-/* SEND LOGIN LINK */
-function sendOTP(){
-  const email = document.getElementById("email").value;
-
-  auth.sendSignInLinkToEmail(email, actionCodeSettings)
-  .then(()=>{
-    localStorage.setItem("emailForSignIn", email);
-    alert("Login link sent to your email 📩");
-  })
-  .catch(e=>alert(e.message));
-}
-
-/* COMPLETE SIGN IN */
-if(auth.isSignInWithEmailLink(window.location.href)){
-  let email = localStorage.getItem("emailForSignIn");
-
-  if(!email){
-    email = prompt("Confirm your email");
-  }
-
-  auth.signInWithEmailLink(email, window.location.href)
-  .then(()=>{
-    localStorage.removeItem("emailForSignIn");
-    alert("Login Successful ✅");
-  })
-  .catch(e=>alert(e.message));
-}
-
-/* AUTH STATE */
-auth.onAuthStateChanged(user=>{
- if(user){
-   document.getElementById("loginPage").style.display="none";
-   document.getElementById("site").style.display="block";
- }
-});
-
-/* LOGOUT */
-function logout(){
- auth.signOut().then(()=>location.reload());
-}
-
-/* PACKAGE DATA */
-const data=[
-{name:"Maldives Escape",price:"₹75,000"},
-{name:"Paris Delight",price:"₹82,000"},
-{name:"Dubai Luxury",price:"₹68,000"},
-{name:"Thailand Fun",price:"₹55,000"},
-{name:"Singapore Trip",price:"₹72,000"},
-{name:"Bali Retreat",price:"₹70,000"},
-{name:"Switzerland Tour",price:"₹95,000"}
+/* ==========================
+   APP DATA (packages)
+   ========================== */
+const packages = [
+  { id: "maldives", name: "Maldives Escape", price: "₹75,000", img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=60", desc: "7 nights in a water villa, breakfast included, island transfers." },
+  { id: "paris", name: "Paris Delight", price: "₹82,000", img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1400&q=60", desc: "4 nights near the Seine, city tour, and museum passes." },
+  { id: "dubai", name: "Dubai Luxury", price: "₹68,000", img: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=1400&q=60", desc: "5-star stay, desert safari, and Burj Khalifa visit." },
+  { id: "thailand", name: "Thailand Fun", price: "₹55,000", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=60", desc: "Beaches, island hopping, and local cuisine tours." },
+  { id: "singapore", name: "Singapore Trip", price: "₹72,000", img: "https://images.unsplash.com/photo-1499346030926-9a72daac6c63?auto=format&fit=crop&w=1400&q=60", desc: "City attractions, Gardens by the Bay, and Sentosa island." },
+  { id: "bali", name: "Bali Retreat", price: "₹70,000", img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=60", desc: "Relaxing villas, spa, and rice terrace excursions." },
+  { id: "switzerland", name: "Switzerland Tour", price: "₹95,000", img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=60", desc: "Alpine scenery, scenic trains, and lakeside towns." }
 ];
 
-data.forEach(p=>{
- document.getElementById("packages").innerHTML+=`
- <div class="card">
-  <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470">
-  <div>
-   <h3>${p.name}</h3>
-   <div class="price">${p.price}</div>
-   <input type="date" id="date-${p.name}">
-   <button onclick="book('${p.name}')">Book Now</button>
-  </div>
- </div>`;
+/* ==========================
+   UI UTILITIES
+   ========================== */
+const $ = id => document.getElementById(id);
+
+function showSection(name){
+  // hide login card always
+  $("loginCard").style.display = "none";
+  const sections = {
+    packages: $("packagesSection"),
+    bookings: $("bookingsSection"),
+    reviews: $("reviewsSection"),
+    profile: $("profileSection")
+  };
+  Object.values(sections).forEach(s => s.classList.remove("visible"));
+  if(sections[name]) sections[name].classList.add("visible");
+  // special render hooks
+  if(name === "bookings") loadUserBookings();
+  if(name === "reviews") loadReviews();
+  if(name === "packages") renderPackages();
+  if(name === "profile") renderProfile();
+}
+
+/* ==========================
+   AUTH FLOW (Email Link)
+   ========================== */
+function openLogin(){
+  // show the login card
+  $("loginCard").style.display = "block";
+  showSection("packages");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function sendOTP(){
+  const emailInput = $("loginEmail");
+  const email = (emailInput.value||"").trim();
+  if(!email) return alert("Please enter an email address.");
+  auth.sendSignInLinkToEmail(email, actionCodeSettings)
+    .then(()=>{
+      localStorage.setItem("emailForSignIn", email);
+      alert("Login link sent to your email. Open it to complete sign-in.");
+      emailInput.value = "";
+    })
+    .catch(e=>alert("Error sending login link: "+e.message));
+}
+
+// helpful for testing/demo without email link (not secure; only for demo)
+function useTestAccount(){
+  const demoEmail = "demo@example.com";
+  // create a pseudo-sign-in by using anonymous auth is not enabled; instead we'll fake a simple "session"
+  // For a real project enable a proper sign-in method. Here we prompt for a display name and set a minimal local session.
+  localStorage.setItem("demoUserEmail", demoEmail);
+  updateUIForUser({ email: demoEmail, isDemo: true });
+  alert("Test account active as "+demoEmail+". (Demo mode — no Firebase auth used)");
+}
+
+/* Complete sign-in if opened via link */
+if (auth.isSignInWithEmailLink(window.location.href)) {
+  let email = localStorage.getItem("emailForSignIn");
+  if (!email) email = prompt("Please confirm your email for sign-in");
+  auth.signInWithEmailLink(email, window.location.href)
+    .then((result) => {
+      localStorage.removeItem("emailForSignIn");
+      alert("Login successful ✅");
+    })
+    .catch(e => alert("Could not sign you in: " + e.message));
+}
+
+/* Monitor auth state */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    updateUIForUser({ email: user.email, isDemo: false });
+  } else {
+    // check demo fallback
+    const demo = localStorage.getItem("demoUserEmail");
+    if (demo) updateUIForUser({ email: demo, isDemo: true });
+    else updateUIForUser(null);
+  }
 });
 
-/* BOOKING SAVE */
-function book(name){
- let date=document.getElementById("date-"+name).value;
- if(!date) return alert("Select travel date");
-
- db.collection("bookings").add({
-   package:name,
-   date:date,
-   user:auth.currentUser.email,
-   createdAt:firebase.firestore.FieldValue.serverTimestamp()
- })
- .then(()=>alert("Booking Saved ✅"))
- .catch(e=>alert(e.message));
+function updateUIForUser(user){
+  const authBtn = $("authBtn");
+  const profileBtn = $("profileBtn");
+  if(!user){
+    authBtn.textContent = "Login";
+    profileBtn.style.display = "inline-block";
+    $("userEmail").textContent = "";
+    // show packages by default
+    showSection("packages");
+  } else {
+    authBtn.textContent = "Logout";
+    authBtn.onclick = logout;
+    $("userEmail").textContent = user.email || "Unknown user";
+    profileBtn.style.display = "inline-block";
+    // auto-load bookings & reviews for logged-in user
+    loadUserBookings();
+    loadReviews();
+    renderPackages();
+  }
 }
+
+/* Logout function covers both real auth and demo mode */
+function logout(){
+  const demo = localStorage.getItem("demoUserEmail");
+  if(demo){
+    localStorage.removeItem("demoUserEmail");
+    alert("Demo session cleared.");
+    updateUIForUser(null);
+    location.reload();
+    return;
+  }
+  auth.signOut().then(()=> {
+    updateUIForUser(null);
+    alert("Logged out.");
+    location.reload();
+  }).catch(e=>alert(e.message));
+}
+
+/* ==========================
+   RENDER PACKAGES & BOOKING FLOW
+   ========================== */
+function renderPackages(){
+  const grid = $("packagesGrid");
+  grid.innerHTML = "";
+  packages.forEach(p => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <img src="${p.img}" alt="${p.name}">
+      <div class="card-body">
+        <h3 style="margin-bottom:6px">${p.name}</h3>
+        <div class="price">${p.price}</div>
+        <div class="muted" style="margin:8px 0">${p.desc}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="date" id="date-${p.id}" />
+          <button class="btn" onclick="openBookingModal('${p.id}')">Book Now</button>
+          <button class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit" onclick="showPackageDetails('${p.id}')">View</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+
+  // populate review package select
+  const sel = $("reviewPackage");
+  sel.innerHTML = `<option value="">Select a package (optional)</option>`;
+  packages.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.name}</option>`);
+}
+
+/* show simple package details */
+function showPackageDetails(id){
+  const p = packages.find(x=>x.id===id);
+  if(!p) return alert("Package not found");
+  showModal(`
+    <h3>${p.name}</h3>
+    <div class="muted">${p.desc}</div>
+    <div style="margin-top:8px" class="price">${p.price}</div>
+    <div style="margin-top:12px;text-align:right">
+      <button class="btn" onclick="closeModal()">Close</button>
+      <button class="btn" style="background:#1b6b9a;color:#eaf6ff" onclick="openBookingModal('${p.id}')">Book This</button>
+    </div>
+  `);
+}
+
+/* open booking confirmation modal */
+function openBookingModal(id){
+  const p = packages.find(x=>x.id===id);
+  if(!p) return alert("Package not found");
+  const dateInput = $(`date-${id}`);
+  let chosenDate = dateInput ? dateInput.value : "";
+  const content = document.createElement("div");
+  content.innerHTML = `
+    <h3>Confirm Booking</h3>
+    <div style="margin-top:6px"><strong>${p.name}</strong></div>
+    <div class="muted" style="margin-top:6px">${p.desc}</div>
+    <div class="price" style="margin-top:8px">${p.price}</div>
+    <div style="margin-top:10px">
+      <label class="muted">Select travel date</label>
+      <input type="date" id="modalDate" value="${chosenDate}" />
+    </div>
+    <div style="margin-top:12px;text-align:right">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="confirmBooking('${p.id}')">Confirm Booking</button>
+    </div>
+  `;
+  showModal(content.innerHTML);
+}
+
+/* confirm and save booking to Firestore */
+function confirmBooking(packageId){
+  // check auth or demo
+  const demo = localStorage.getItem("demoUserEmail");
+  const currentUser = (auth.currentUser && auth.currentUser.email) || demo;
+  if(!currentUser) return alert("Please login first (or use Test Account) to make a booking.");
+
+  const dateVal = $("modalDate").value;
+  if(!dateVal) return alert("Please choose a travel date.");
+
+  const pkg = packages.find(p=>p.id===packageId);
+  if(!pkg) return alert("Invalid package.");
+
+  // Save booking with initial status 'pending'
+  db.collection("bookings").add({
+    packageId: pkg.id,
+    packageName: pkg.name,
+    price: pkg.price,
+    date: dateVal,
+    user: currentUser,
+    status: "pending",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    closeModal();
+    alert("Booking saved ✅ (status: pending). View it in My Bookings.");
+    loadUserBookings(); // refresh
+  }).catch(e => alert("Booking failed: "+e.message));
+}
+
+/* ==========================
+   BOOKINGS: load & render
+   ========================== */
+let cachedBookings = [];
+
+function loadUserBookings(){
+  const demo = localStorage.getItem("demoUserEmail");
+  const currentUser = (auth.currentUser && auth.currentUser.email) || demo;
+  if(!currentUser){
+    $("bookingList").innerHTML = `<div class="empty">You are not signed in. Please login to see your bookings.</div>`;
+    return;
+  }
+
+  // listen for realtime updates to the user's bookings
+  db.collection("bookings")
+    .where("user", "==", currentUser)
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      cachedBookings = snapshot.docs.map(d => ({ id: d.id, ...(d.data()||{}) }));
+      renderBookings();
+    }, err => {
+      // if ordering by createdAt fails because missing index or null, fallback to non-ordered fetch
+      db.collection("bookings").where("user", "==", currentUser).get().then(snap => {
+        cachedBookings = snap.docs.map(d=>({ id:d.id, ...(d.data()||{}) }));
+        renderBookings();
+      }).catch(e=> $("bookingList").innerHTML = `<div class="empty">Failed to load bookings: ${e.message}</div>`);
+    });
+}
+
+function renderBookings(){
+  const list = $("bookingList");
+  const filter = $("filterStatus").value;
+  const items = cachedBookings.filter(b => filter === "all" ? true : (b.status || "pending") === filter);
+  if(items.length === 0){
+    list.innerHTML = `<div class="empty">No bookings found${filter !== "all" ? " for selected status" : ""}.</div>`;
+    return;
+  }
+  list.innerHTML = "";
+  items.forEach(b => {
+    const row = document.createElement("div");
+    row.className = "booking-row";
+    const status = (b.status || "pending");
+    const statusClass = status === "pending" ? "status-pending" : status === "completed" ? "status-completed" : "status-cancelled";
+    row.innerHTML = `
+      <div style="min-width:0" class="booking-info">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+          <div style="font-weight:800">${b.packageName || b.packageId}</div>
+          <div class="muted">${b.price || ""}</div>
+        </div>
+        <div class="small">Travel Date: <strong>${b.date||'N/A'}</strong> • Booked by <strong>${b.user}</strong></div>
+        <div class="small">Booked on: <strong>${b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().toLocaleString() : (b.createdAt || '—')}</strong></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <div class="badge ${statusClass}">${status.toUpperCase()}</div>
+        <div class="actions">
+          <button onclick="viewBookingDetails('${b.id}')" style="background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:8px">Details</button>
+          ${status === 'pending' ? `<button onclick="cancelBooking('${b.id}')" style="background:#4a1b1b;color:#fff;padding:8px;border-radius:8px;border:none">Cancel</button>` : ''}
+          ${status === 'completed' ? `<button onclick="openAddReviewForBooking('${b.id}')" style="background:#0b3f1a;color:#fff;padding:8px;border-radius:8px;border:none">Add Review</button>` : ''}
+        </div>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+/* view booking details */
+function viewBookingDetails(id){
+  const b = cachedBookings.find(x=>x.id===id);
+  if(!b) return alert("Booking not found");
+  showModal(`
+    <h3>${b.packageName || b.packageId}</h3>
+    <div class="muted">${b.price || ""} • Travel Date: <strong>${b.date || 'N/A'}</strong></div>
+    <div style="margin-top:10px"><strong>Status:</strong> ${b.status || 'pending'}</div>
+    <div style="margin-top:10px" class="muted">Booked by: ${b.user}</div>
+    <div style="margin-top:12px;text-align:right">
+      <button class="btn" onclick="closeModal()">Close</button>
+      ${b.status === 'pending' ? `<button class="btn" style="background:#4a1b1b;color:#fff" onclick="cancelBooking('${id}')">Cancel Booking</button>` : ''}
+    </div>
+  `);
+}
+
+/* cancel booking: we update status to 'cancelled' (keeps history) */
+function cancelBooking(id){
+  if(!confirm("Are you sure you want to cancel this booking?")) return;
+  db.collection("bookings").doc(id).update({ status: "cancelled" })
+    .then(()=> { alert("Booking cancelled."); loadUserBookings(); closeModal(); })
+    .catch(e => alert("Failed to cancel: "+e.message));
+}
+
+/* allow admin/user to mark completed — for demo we let user mark completed */
+function markCompleted(id){
+  db.collection("bookings").doc(id).update({ status: "completed" })
+    .then(()=>{ alert("Status set to completed."); loadUserBookings(); })
+    .catch(e=>alert(e.message));
+}
+
+/* allow adding review for a booking (only if completed ideally) */
+function openAddReviewForBooking(bookingId){
+  const booking = cachedBookings.find(b=>b.id===bookingId);
+  if(!booking) return alert("Booking not found");
+  const content = `
+    <h3>Leave Review for ${booking.packageName}</h3>
+    <div class="muted">Booking date: ${booking.date}</div>
+    <div style="margin-top:10px">
+      <label class="muted">Rating (1-5)</label>
+      <input type="number" id="bookingReviewRating" min="1" max="5" />
+      <label class="muted" style="margin-top:8px;display:block">Comment</label>
+      <textarea id="bookingReviewComment" rows="3"></textarea>
+    </div>
+    <div style="margin-top:12px;text-align:right">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="submitReviewForBooking('${bookingId}')">Submit Review</button>
+    </div>
+  `;
+  showModal(content);
+}
+function submitReviewForBooking(bookingId){
+  const rating = parseInt($("bookingReviewRating").value || 0,10);
+  const comment = $("bookingReviewComment").value || "";
+  const booking = cachedBookings.find(b=>b.id===bookingId);
+  if(!booking) return alert("Booking not found");
+  const demo = localStorage.getItem("demoUserEmail");
+  const currentUser = (auth.currentUser && auth.currentUser.email) || demo;
+  if(!currentUser) return alert("Please login first.");
+  if(!rating || rating<1 || rating>5) return alert("Please provide a rating 1-5.");
+
+  db.collection("reviews").add({
+    bookingId,
+    packageId: booking.packageId,
+    packageName: booking.packageName,
+    rating,
+    comment,
+    user: currentUser,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    alert("Thanks — your review has been submitted.");
+    closeModal();
+    loadReviews();
+  }).catch(e=>alert("Failed to submit review: "+e.message));
+}
+
+/* ==========================
+   REVIEWS: submit & load
+   ========================== */
+function submitReview(){
+  const rating = parseInt($("reviewRating").value || 0,10);
+  const comment = $("reviewComment").value || "";
+  const packageId = $("reviewPackage").value || "";
+  const pkg = packages.find(p=>p.id===packageId) || {};
+  const demo = localStorage.getItem("demoUserEmail");
+  const currentUser = (auth.currentUser && auth.currentUser.email) || demo;
+  if(!currentUser) return alert("Please login first (or use Test Account).");
+  if(!rating || rating<1 || rating>5) return alert("Rating must be between 1 and 5.");
+  db.collection("reviews").add({
+    packageId: pkg.id || null,
+    packageName: pkg.name || null,
+    rating,
+    comment,
+    user: currentUser,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    $("reviewRating").value = "";
+    $("reviewComment").value = "";
+    $("reviewPackage").value = "";
+    alert("Review submitted. Thank you!");
+    loadReviews();
+  }).catch(e=>alert("Failed to submit review: "+e.message));
+}
+
+function loadReviews(){
+  // show latest reviews
+  db.collection("reviews").orderBy("createdAt","desc").limit(50).get()
+    .then(snap => {
+      const list = $("reviewsList");
+      if(snap.empty){ list.innerHTML = `<div class="empty">No reviews yet.</div>`; return; }
+      list.innerHTML = "";
+      snap.docs.forEach(doc => {
+        const r = doc.data();
+        const el = document.createElement("div");
+        el.className = "booking-row";
+        el.style.flexDirection = "column";
+        el.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%">
+            <div style="font-weight:800">${r.packageName || "General"}</div>
+            <div class="small">Rating: <strong>${r.rating}</strong></div>
+          </div>
+          <div class="muted" style="margin-top:6px">${r.comment || ""}</div>
+          <div class="small" style="margin-top:6px">By <strong>${r.user}</strong> • ${r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString() : ""}</div>
+        `;
+        list.appendChild(el);
+      });
+    })
+    .catch(e => {
+      $("reviewsList").innerHTML = `<div class="empty">Failed to load reviews: ${e.message}</div>`;
+    });
+}
+
+/* ==========================
+   PROFILE RENDER
+   ========================== */
+function renderProfile(){
+  const demo = localStorage.getItem("demoUserEmail");
+  const email = (auth.currentUser && auth.currentUser.email) || demo;
+  $("userEmail").textContent = email || "Not signed in";
+}
+
+/* ==========================
+   MODAL HELPERS
+   ========================== */
+function showModal(html){
+  const root = $("modalRoot");
+  root.style.display = "block";
+  root.innerHTML = `
+    <div class="modal-backdrop" onclick="closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        ${typeof html === "string" ? html : html.innerHTML}
+      </div>
+    </div>
+  `;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function closeModal(){ $("modalRoot").style.display = "none"; $("modalRoot").innerHTML = ""; }
+
+/* ==========================
+   ON LOAD
+   ========================== */
+document.addEventListener("DOMContentLoaded", ()=>{
+  renderPackages();
+  // show login card if not signed in
+  if(!auth.currentUser && !localStorage.getItem("demoUserEmail")){
+    // keep login hidden; user can click Login
+    $("loginCard").style.display = "none";
+  }
+  // hook auth button default (for unauthenticated)
+  $("authBtn").onclick = openLogin;
+});
 </script>
 
 </body>
