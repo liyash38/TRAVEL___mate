@@ -1,72 +1,50 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>TRAVEL_MATE</title>
+<title>Travel Mate - Google Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#000;color:#fff}
-.login-page{
- min-height:100vh;
- background:url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1800&q=80") center/cover no-repeat;
- display:flex;align-items:center;justify-content:center;
-}
-.login-card{
- background:rgba(0,0,0,.8);
- width:360px;padding:30px;border-radius:18px;text-align:center;
-}
-.logo{font-size:32px;font-weight:900;color:#facc15}
-.logo span{color:#38bdf8}
-input{width:100%;padding:12px;margin:8px 0;border:none;border-radius:8px}
-button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:25px;
- background:#facc15;font-weight:700;cursor:pointer}
-#site{display:none}
-nav{
- background:#020617;padding:16px 30px;
- display:flex;justify-content:space-between;align-items:center
-}
-nav ul{list-style:none;display:flex;gap:25px}
-.section{max-width:1200px;margin:auto;padding:60px 20px}
-.packages{
- display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:25px
-}
-.card{
- background:#020617;border-radius:16px;overflow:hidden;
- transition:.3s
-}
-.card:hover{transform:translateY(-6px)}
-.card img{width:100%;height:180px;object-fit:cover}
-.card div{padding:16px}
-.price{color:#facc15;font-weight:700}
+body{background:#0f172a;color:white;padding-bottom:50px}
+nav{background:#020617;padding:15px;display:flex;justify-content:space-between}
+button{padding:10px 16px;border:none;border-radius:6px;background:#facc15;font-weight:bold;cursor:pointer;margin-top:10px}
+.card{background:#1e293b;padding:15px;border-radius:10px;margin:20px 0}
+.hidden{display:none}
+footer{text-align:center;padding:20px;background:#020617;margin-top:40px}
+.star{cursor:pointer;font-size:22px;color:gray}
+.star.active{color:gold}
+.carousel{position:relative;overflow:hidden;border-radius:8px}
+.carousel img{width:100%;height:220px;object-fit:cover;display:none}
+.carousel img.active{display:block}
+.review-box{background:#0f172a;padding:10px;border-radius:6px;margin-top:10px}
+.google-btn{background:#4285F4;color:white}
 </style>
 </head>
 
 <body>
 
-<div class="login-page" id="loginPage">
- <div class="login-card">
-  <div class="logo">Travel <span>Mate</span></div>
-  <h2>Email OTP Login</h2>
-  <input id="email" placeholder="Enter Email">
-  <button onclick="sendOTP()">Send Login Link</button>
- </div>
-</div>
-
-<div id="site">
 <nav>
- <div class="logo">Travel <span>Mate</span></div>
- <ul>
-  <li onclick="logout()" style="cursor:pointer">Logout</li>
- </ul>
+<div><b>Travel Mate</b></div>
+<div id="navRight"></div>
 </nav>
 
-<div class="section">
- <h2>Packages</h2><br>
- <div class="packages" id="packages"></div>
+<div id="authSection" style="padding:20px;">
+<h2>Login</h2>
+<button class="google-btn" onclick="googleLogin()">Sign in with Google</button>
 </div>
+
+<div id="main" class="hidden" style="padding:20px;">
+<h2>Packages</h2>
+<div id="packages"></div>
 </div>
+
+<footer>
+© 2026 Travel Mate <br>
+travelmate@gmail.com
+</footer>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -83,95 +61,138 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* EMAIL LINK SETTINGS */
-const actionCodeSettings = {
-  url: window.location.origin + window.location.pathname,
-
-  handleCodeInApp: true
-};
-
-/* SEND LOGIN LINK */
-function sendOTP(){
-  const email = document.getElementById("email").value;
-
-  auth.sendSignInLinkToEmail(email, actionCodeSettings)
-  .then(()=>{
-    localStorage.setItem("emailForSignIn", email);
-    alert("Login link sent to your email 📩");
-  })
-  .catch(e=>alert(e.message));
+function googleLogin(){
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+  .catch(error=>alert(error.message));
 }
 
-/* COMPLETE SIGN IN */
-if(auth.isSignInWithEmailLink(window.location.href)){
-  let email = localStorage.getItem("emailForSignIn");
-
-  if(!email){
-    email = prompt("Confirm your email");
-  }
-
-  auth.signInWithEmailLink(email, window.location.href)
-  .then(()=>{
-    localStorage.removeItem("emailForSignIn");
-    alert("Login Successful ✅");
-  })
-  .catch(e=>alert(e.message));
-}
-
-/* AUTH STATE */
 auth.onAuthStateChanged(user=>{
- if(user){
-   document.getElementById("loginPage").style.display="none";
-   document.getElementById("site").style.display="block";
- }
+  if(user){
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("main").classList.remove("hidden");
+    document.getElementById("navRight").innerHTML=user.displayName+" | <button onclick='logout()'>Logout</button>";
+    loadPackages();
+  }
 });
 
-/* LOGOUT */
 function logout(){
- auth.signOut().then(()=>location.reload());
+  auth.signOut();
+  location.reload();
 }
 
-/* PACKAGE DATA */
-const data=[
-{name:"Maldives Escape",price:"₹75,000"},
-{name:"Paris Delight",price:"₹82,000"},
-{name:"Dubai Luxury",price:"₹68,000"},
-{name:"Thailand Fun",price:"₹55,000"},
-{name:"Singapore Trip",price:"₹72,000"},
-{name:"Bali Retreat",price:"₹70,000"},
-{name:"Switzerland Tour",price:"₹95,000"}
+const packageData=[
+{
+name:"Maldives Escape",
+price:75000,
+images:[
+"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+"https://images.unsplash.com/photo-1500375592092-40eb2168fd21",
+"https://images.unsplash.com/photo-1470115636492-6d2b56f9146d"
+]
+},
+{
+name:"Paris Delight",
+price:82000,
+images:[
+"https://images.unsplash.com/photo-1502602898657-3e91760cbb34",
+"https://images.unsplash.com/photo-1499856871958-5b9627545d1a",
+"https://images.unsplash.com/photo-1522092787789-3a4a6d4e8d47"
+]
+}
 ];
 
-data.forEach(p=>{
- document.getElementById("packages").innerHTML+=`
- <div class="card">
-  <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470">
-  <div>
-   <h3>${p.name}</h3>
-   <div class="price">${p.price}</div>
-   <input type="date" id="date-${p.name}">
-   <button onclick="book('${p.name}')">Book Now</button>
-  </div>
- </div>`;
+function loadPackages(){
+let html="";
+packageData.forEach(p=>{
+html+=`
+<div class="card">
+<h3>${p.name}</h3>
+<div class="carousel" id="carousel-${p.name}">
+${p.images.map((img,i)=>`<img src="${img}" class="${i===0?'active':''}">`).join("")}
+</div>
+<p>₹${p.price}</p>
+<div id="stars-${p.name}"></div>
+<div id="avg-${p.name}"></div>
+<textarea id="comment-${p.name}" placeholder="Write review"></textarea>
+<button onclick="submitReview('${p.name}')">Submit Review</button>
+<div id="reviews-${p.name}"></div>
+</div>`;
 });
+document.getElementById("packages").innerHTML=html;
 
-/* BOOKING SAVE */
-function book(name){
- let date=document.getElementById("date-"+name).value;
- if(!date) return alert("Select travel date");
+packageData.forEach(p=>{
+initCarousel(p.name);
+initStars(p.name);
+loadReviews(p.name);
+});
+}
 
- db.collection("bookings").add({
-   package:name,
-   date:date,
-   user:auth.currentUser.email,
-   createdAt:firebase.firestore.FieldValue.serverTimestamp()
- })
- .then(()=>alert("Booking Saved ✅"))
- .catch(e=>alert(e.message));
+function initCarousel(name){
+let index=0;
+const images=document.querySelectorAll(`#carousel-${name} img`);
+setInterval(()=>{
+images[index].classList.remove("active");
+index=(index+1)%images.length;
+images[index].classList.add("active");
+},3000);
+}
+
+function initStars(name){
+let container=document.getElementById("stars-"+name);
+for(let i=1;i<=5;i++){
+let span=document.createElement("span");
+span.innerHTML="★";
+span.className="star";
+span.onclick=()=>highlightStars(name,i);
+container.appendChild(span);
+}
+}
+
+function highlightStars(name,count){
+let stars=document.querySelectorAll(`#stars-${name} .star`);
+stars.forEach((s,i)=>{
+s.classList.toggle("active",i<count);
+});
+stars.forEach(s=>s.dataset.rating=count);
+}
+
+function submitReview(name){
+let stars=document.querySelectorAll(`#stars-${name} .star`);
+let rating=stars[0].dataset.rating;
+let comment=document.getElementById("comment-"+name).value;
+if(!rating){alert("Select rating");return;}
+db.collection("reviews").add({
+package:name,
+rating:parseInt(rating),
+comment:comment,
+user:auth.currentUser.email
+}).then(()=>{
+document.getElementById("comment-"+name).value="";
+loadReviews(name);
+});
+}
+
+function loadReviews(name){
+db.collection("reviews").where("package","==",name)
+.onSnapshot(snap=>{
+let total=0,count=0,html="";
+snap.forEach(doc=>{
+let r=doc.data();
+total+=r.rating;
+count++;
+html+=`<div class="review-box">
+<b>${r.user}</b> ⭐${r.rating}
+<p>${r.comment}</p>
+</div>`;
+});
+let avg=count?(total/count).toFixed(1):0;
+document.getElementById("avg-"+name).innerHTML="Average Rating: ⭐ "+avg;
+document.getElementById("reviews-"+name).innerHTML=html;
+});
 }
 </script>
 
