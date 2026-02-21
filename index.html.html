@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TRAVEL_MATE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#000;color:#fff}
+.login-page{
+ min-height:100vh;
+ background:url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1800&q=80") center/cover no-repeat;
+ display:flex;align-items:center;justify-content:center;
+}
+.login-card{
+ background:rgba(0,0,0,.8);
+ width:360px;padding:30px;border-radius:18px;text-align:center;
+}
+.logo{font-size:32px;font-weight:900;color:#facc15}
+.logo span{color:#38bdf8}
+input{width:100%;padding:12px;margin:8px 0;border:none;border-radius:8px}
+button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:25px;
+ background:#facc15;font-weight:700;cursor:pointer}
+#site{display:none}
+nav{
+ background:#020617;padding:16px 30px;
+ display:flex;justify-content:space-between;align-items:center
+}
+nav ul{list-style:none;display:flex;gap:25px}
+.section{max-width:1200px;margin:auto;padding:60px 20px}
+.packages{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:25px
+}
+.card{
+ background:#020617;border-radius:16px;overflow:hidden;
+ transition:.3s
+}
+.card:hover{transform:translateY(-6px)}
+.card img{width:100%;height:180px;object-fit:cover}
+.card div{padding:16px}
+.price{color:#facc15;font-weight:700}
+</style>
+</head>
+
+<body>
+
+<div class="login-page" id="loginPage">
+ <div class="login-card">
+  <div class="logo">Travel <span>Mate</span></div>
+  <h2>Email OTP Login</h2>
+  <input id="email" placeholder="Enter Email">
+  <button onclick="sendOTP()">Send Login Link</button>
+ </div>
+</div>
+
+<div id="site">
+<nav>
+ <div class="logo">Travel <span>Mate</span></div>
+ <ul>
+  <li onclick="logout()" style="cursor:pointer">Logout</li>
+ </ul>
+</nav>
+
+<div class="section">
+ <h2>Packages</h2><br>
+ <div class="packages" id="packages"></div>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBe9PPyqfs9Th7AGumhvT0u0fBW2e7__K8",
+  authDomain: "travelmate-7c433.firebaseapp.com",
+  projectId: "travelmate-7c433",
+  storageBucket: "travelmate-7c433.firebasestorage.app",
+  messagingSenderId: "452266842172",
+  appId: "1:452266842172:web:a93a82e3d3c3b87447cb39"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* EMAIL LINK SETTINGS */
+const actionCodeSettings = {
+  url: window.location.origin + window.location.pathname,
+
+  handleCodeInApp: true
+};
+
+/* SEND LOGIN LINK */
+function sendOTP(){
+  const email = document.getElementById("email").value;
+
+  auth.sendSignInLinkToEmail(email, actionCodeSettings)
+  .then(()=>{
+    localStorage.setItem("emailForSignIn", email);
+    alert("Login link sent to your email 📩");
+  })
+  .catch(e=>alert(e.message));
+}
+
+/* COMPLETE SIGN IN */
+if(auth.isSignInWithEmailLink(window.location.href)){
+  let email = localStorage.getItem("emailForSignIn");
+
+  if(!email){
+    email = prompt("Confirm your email");
+  }
+
+  auth.signInWithEmailLink(email, window.location.href)
+  .then(()=>{
+    localStorage.removeItem("emailForSignIn");
+    alert("Login Successful ✅");
+  })
+  .catch(e=>alert(e.message));
+}
+
+/* AUTH STATE */
+auth.onAuthStateChanged(user=>{
+ if(user){
+   document.getElementById("loginPage").style.display="none";
+   document.getElementById("site").style.display="block";
+ }
+});
+
+/* LOGOUT */
+function logout(){
+ auth.signOut().then(()=>location.reload());
+}
+
+/* PACKAGE DATA */
+const data=[
+{name:"Maldives Escape",price:"₹75,000"},
+{name:"Paris Delight",price:"₹82,000"},
+{name:"Dubai Luxury",price:"₹68,000"},
+{name:"Thailand Fun",price:"₹55,000"},
+{name:"Singapore Trip",price:"₹72,000"},
+{name:"Bali Retreat",price:"₹70,000"},
+{name:"Switzerland Tour",price:"₹95,000"}
+];
+
+data.forEach(p=>{
+ document.getElementById("packages").innerHTML+=`
+ <div class="card">
+  <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470">
+  <div>
+   <h3>${p.name}</h3>
+   <div class="price">${p.price}</div>
+   <input type="date" id="date-${p.name}">
+   <button onclick="book('${p.name}')">Book Now</button>
+  </div>
+ </div>`;
+});
+
+/* BOOKING SAVE */
+function book(name){
+ let date=document.getElementById("date-"+name).value;
+ if(!date) return alert("Select travel date");
+
+ db.collection("bookings").add({
+   package:name,
+   date:date,
+   user:auth.currentUser.email,
+   createdAt:firebase.firestore.FieldValue.serverTimestamp()
+ })
+ .then(()=>alert("Booking Saved ✅"))
+ .catch(e=>alert(e.message));
+}
+</script>
+
+</body>
+</html>
