@@ -1,276 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Travel Mate</title>
-  <style>
-    /* Basic styling for layout and readability */
-    body { font-family: Arial, sans-serif; margin: 0; }
-    header { background: #3498db; color: white; padding: 1em; text-align: center; }
-    nav { background: #2980b9; padding: 0.5em; text-align: center; }
-    nav button { background: #3498db; color: white; border: none; padding: 0.5em 1em; margin: 0 0.25em; cursor: pointer; }
-    nav button.active { background: #1abc9c; }
-    #message { padding: 0.5em; color: #000; }
-    section { display: none; padding: 1em; }
-    section.active { display: block; }
-    .package { border: 1px solid #ccc; padding: 1em; margin: 1em 0; }
-    .package img { max-width: 100%; height: auto; }
-    input, textarea { width: 100%; padding: 0.5em; margin: 0.5em 0; }
-    button { padding: 0.5em 1em; }
-    .notice { background: #ffeb3b; padding: 0.5em; text-align: center; font-weight: bold; }
-  </style>
-  <!-- Firebase JS SDK (v8) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script>
-    // Initialize Firebase
-    var firebaseConfig = {
-      // TODO: Replace with your Firebase config
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      // ... other config fields ...
-    };
-    firebase.initializeApp(firebaseConfig);
-    var auth = firebase.auth();
-    var db = firebase.firestore();
+<meta charset="UTF-8">
+<title>TRAVEL_MATE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    window.onload = function() {
-      // Show a notice about adding the domain to Firebase Auth
-      document.getElementById('authNotice').innerText =
-        'Note: Ensure domain ' + window.location.origin +
-        ' is added to Firebase Auth Authorized Domains.';
-      // Navigation button handling
-      document.querySelectorAll('nav button').forEach(btn => {
-        btn.onclick = function() {
-          document.querySelector('nav button.active')?.classList.remove('active');
-          btn.classList.add('active');
-          document.querySelector('section.active')?.classList.remove('active');
-          document.getElementById(btn.dataset.section).classList.add('active');
-        };
-      });
-      // Default view: Packages
-      document.querySelector('nav button[data-section="packages"]').click();
-      // Check for sign-in via email link (passwordless login)
-      if (auth.isSignInWithEmailLink(window.location.href)) {
-        let email = window.localStorage.getItem('emailForSignIn');
-        if (!email) {
-          email = window.prompt('Please provide your email for confirmation');
-        }
-        auth.signInWithEmailLink(email, window.location.href)
-          .then((result) => {
-            showMessage('Logged in as ' + result.user.email);
-            window.localStorage.removeItem('emailForSignIn');
-            updateUIForUser(result.user);
-          })
-          .catch((error) => {
-            showMessage('Error during sign-in: ' + error.message);
-          });
-      }
-    };
-
-    // Update UI on auth state change
-    auth.onAuthStateChanged(user => {
-      updateUIForUser(user);
-    });
-    function updateUIForUser(user) {
-      if (user) {
-        // Hide login, show profile info
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('userProfile').style.display = 'block';
-        document.getElementById('userEmail').innerText = user.email;
-        loadBookings();
-        loadReviews();
-      } else {
-        // Show login, clear bookings list
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('userProfile').style.display = 'none';
-        document.getElementById('bookingsList').innerHTML = 'Please log in to see bookings.';
-      }
-    }
-
-    // Send Firebase email sign-in link
-    function sendLoginLink() {
-      var email = document.getElementById('email').value;
-      if (!email) { showMessage('Enter a valid email.'); return; }
-      var actionCodeSettings = {
-        url: window.location.href,
-        handleCodeInApp: true
-      };
-      auth.sendSignInLinkToEmail(email, actionCodeSettings)
-        .then(() => {
-          window.localStorage.setItem('emailForSignIn', email);
-          showMessage('Sign-in link sent! Check your email.');
-        })
-        .catch(err => {
-          showMessage('Error sending email: ' + err.message);
-        });
-    }
-    function signOut() {
-      auth.signOut().then(() => showMessage('Signed out.'));
-    }
-
-    // Book a package (Firestore or local fallback)
-    function bookPackage(pkgName) {
-      var user = auth.currentUser;
-      if (!user) { showMessage('Please log in to book.'); return; }
-      var booking = {
-        user: user.uid,
-        package: pkgName,
-        date: new Date().toLocaleString()
-      };
-      db.collection('bookings').add(booking)
-        .then(() => {
-          showMessage('Booking confirmed for ' + pkgName + '!');
-          loadBookings();
-        })
-        .catch(error => {
-          showMessage('Unable to save booking, saving locally.');
-          saveLocalBooking(booking);
-          loadBookings();
-        });
-    }
-    function loadBookings() {
-      var user = auth.currentUser;
-      if (!user) return;
-      db.collection('bookings').where('user', '==', user.uid).get()
-        .then(querySnapshot => {
-          var html = '';
-          querySnapshot.forEach(doc => {
-            var data = doc.data();
-            html += '<li>' + data.package + ' on ' + data.date + '</li>';
-          });
-          // Add any local offline bookings
-          var local = JSON.parse(localStorage.getItem('local_bookings')||'[]');
-          local.filter(b => b.user === user.uid)
-               .forEach(b => html += '<li>' + b.package + ' on ' + b.date + ' (offline)</li>');
-          document.getElementById('bookingsList').innerHTML = html || 'No bookings found.';
-        })
-        .catch(error => {
-          // On error, show only local bookings
-          var html = '';
-          var local = JSON.parse(localStorage.getItem('local_bookings')||'[]');
-          local.filter(b => b.user === user.uid)
-               .forEach(b => html += '<li>' + b.package + ' on ' + b.date + ' (offline)</li>');
-          document.getElementById('bookingsList').innerHTML = html || 'No bookings found (offline).';
-        });
-    }
-    function saveLocalBooking(booking) {
-      var local = JSON.parse(localStorage.getItem('local_bookings')||'[]');
-      local.push(booking);
-      localStorage.setItem('local_bookings', JSON.stringify(local));
-    }
-
-    // Submit a review (Firestore or local fallback)
-    function submitReview() {
-      var user = auth.currentUser;
-      if (!user) { showMessage('Please log in to review.'); return; }
-      var comment = document.getElementById('reviewText').value;
-      if (!comment) { showMessage('Enter a review.'); return; }
-      var review = {
-        user: user.uid,
-        comment: comment,
-        date: new Date().toLocaleString()
-      };
-      db.collection('reviews').add(review)
-        .then(() => {
-          showMessage('Review submitted!');
-          document.getElementById('reviewText').value = '';
-          loadReviews();
-        })
-        .catch(error => {
-          showMessage('Unable to save review, saving locally.');
-          saveLocalReview(review);
-          loadReviews();
-        });
-    }
-    function loadReviews() {
-      db.collection('reviews').orderBy('date', 'desc').get()
-        .then(snapshot => {
-          var html = '';
-          snapshot.forEach(doc => {
-            var data = doc.data();
-            html += '<li><strong>' + (data.user === auth.currentUser?.uid ? 'You' : 'Guest') +
-                    ':</strong> ' + data.comment + ' <em>(' + data.date + ')</em></li>';
-          });
-          var local = JSON.parse(localStorage.getItem('local_reviews')||'[]');
-          local.forEach(r => {
-            html += '<li><strong>You (offline):</strong> ' + r.comment + ' <em>(' + r.date + ')</em></li>';
-          });
-          document.getElementById('reviewsList').innerHTML = html || 'No reviews yet.';
-        })
-        .catch(error => {
-          // Show offline reviews only
-          var html = '';
-          var local = JSON.parse(localStorage.getItem('local_reviews')||'[]');
-          local.forEach(r => {
-            html += '<li><strong>You (offline):</strong> ' + r.comment + ' <em>(' + r.date + ')</em></li>';
-          });
-          document.getElementById('reviewsList').innerHTML = html || 'No reviews found (offline).';
-        });
-    }
-    function saveLocalReview(review) {
-      var local = JSON.parse(localStorage.getItem('local_reviews')||'[]');
-      local.push(review);
-      localStorage.setItem('local_reviews', JSON.stringify(local));
-    }
-
-    // Utility to show a message temporarily
-    function showMessage(msg) {
-      var el = document.getElementById('message');
-      el.innerText = msg;
-      setTimeout(() => { el.innerText = ''; }, 4000);
-    }
-  </script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#000;color:#fff}
+.login-page{
+ min-height:100vh;
+ background:url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1800&q=80") center/cover no-repeat;
+ display:flex;align-items:center;justify-content:center;
+}
+.login-card{
+ background:rgba(0,0,0,.8);
+ width:360px;padding:30px;border-radius:18px;text-align:center;
+}
+.logo{font-size:32px;font-weight:900;color:#facc15}
+.logo span{color:#38bdf8}
+input{width:100%;padding:12px;margin:8px 0;border:none;border-radius:8px}
+button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:25px;
+ background:#facc15;font-weight:700;cursor:pointer}
+#site{display:none}
+nav{
+ background:#020617;padding:16px 30px;
+ display:flex;justify-content:space-between;align-items:center
+}
+nav ul{list-style:none;display:flex;gap:25px}
+.section{max-width:1200px;margin:auto;padding:60px 20px}
+.packages{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:25px
+}
+.card{
+ background:#020617;border-radius:16px;overflow:hidden;
+ transition:.3s
+}
+.card:hover{transform:translateY(-6px)}
+.card img{width:100%;height:180px;object-fit:cover}
+.card div{padding:16px}
+.price{color:#facc15;font-weight:700}
+</style>
 </head>
+
 <body>
-  <header>
-    <h1>Travel Mate</h1>
-    <div class="notice" id="authNotice"></div>
-    <div id="message"></div>
-  </header>
-  <nav>
-    <button data-section="packages" class="active">Packages</button>
-    <button data-section="bookings">My Bookings</button>
-    <button data-section="reviews">Reviews</button>
-    <button data-section="profileSection">Profile</button>
-  </nav>
-  <section id="packages" class="active">
-    <h2>Packages</h2>
-    <div class="package">
-      <h3>Beautiful Bali</h3>
-      <img src="https://source.unsplash.com/featured/?Bali" alt="Bali Beach">
-      <p>Experience the serene beaches of Bali.</p>
-      <button onclick="bookPackage('Beautiful Bali')">Book Now</button>
-    </div>
-    <div class="package">
-      <h3>Stunning Switzerland</h3>
-      <img src="https://source.unsplash.com/featured/?Switzerland" alt="Swiss Alps">
-      <p>Explore the majestic Alps of Switzerland.</p>
-      <button onclick="bookPackage('Stunning Switzerland')">Book Now</button>
-    </div>
-  </section>
-  <section id="bookings">
-    <h2>My Bookings</h2>
-    <ul id="bookingsList">Please log in to see bookings.</ul>
-  </section>
-  <section id="reviews">
-    <h2>Reviews</h2>
-    <textarea id="reviewText" placeholder="Write your review here"></textarea>
-    <button onclick="submitReview()">Submit Review</button>
-    <ul id="reviewsList"></ul>
-  </section>
-  <section id="profileSection">
-    <h2>Profile</h2>
-    <div id="loginForm">
-      <p>Enter your email to receive a login link:</p>
-      <input type="email" id="email" placeholder="Your email">
-      <button onclick="sendLoginLink()">Send Login Link</button>
-    </div>
-    <div id="userProfile" style="display:none;">
-      <p>Welcome, <span id="userEmail"></span></p>
-      <button onclick="signOut()">Sign Out</button>
-    </div>
-  </section>
+
+<div class="login-page" id="loginPage">
+ <div class="login-card">
+  <div class="logo">Travel <span>Mate</span></div>
+  <h2>Email OTP Login</h2>
+  <input id="email" placeholder="Enter Email">
+  <button onclick="sendOTP()">Send Login Link</button>
+ </div>
+</div>
+
+<div id="site">
+<nav>
+ <div class="logo">Travel <span>Mate</span></div>
+ <ul>
+  <li onclick="logout()" style="cursor:pointer">Logout</li>
+ </ul>
+</nav>
+
+<div class="section">
+ <h2>Packages</h2><br>
+ <div class="packages" id="packages"></div>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBe9PPyqfs9Th7AGumhvT0u0fBW2e7__K8",
+  authDomain: "travelmate-7c433.firebaseapp.com",
+  projectId: "travelmate-7c433",
+  storageBucket: "travelmate-7c433.firebasestorage.app",
+  messagingSenderId: "452266842172",
+  appId: "1:452266842172:web:a93a82e3d3c3b87447cb39"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* EMAIL LINK SETTINGS */
+const actionCodeSettings = {
+  url: "https://liyash38.github.io/TRAVEL__mate/",
+
+  handleCodeInApp: true
+};
+
+/* SEND LOGIN LINK */
+function sendOTP(){
+  const email = document.getElementById("email").value;
+
+  auth.sendSignInLinkToEmail(email, actionCodeSettings)
+  .then(()=>{
+    localStorage.setItem("emailForSignIn", email);
+    alert("Login link sent to your email 📩");
+  })
+  .catch(e=>alert(e.message));
+}
+
+/* COMPLETE SIGN IN */
+if(auth.isSignInWithEmailLink(window.location.href)){
+  let email = localStorage.getItem("emailForSignIn");
+
+  if(!email){
+    email = prompt("Confirm your email");
+  }
+
+  auth.signInWithEmailLink(email, window.location.href)
+  .then(()=>{
+    localStorage.removeItem("emailForSignIn");
+    alert("Login Successful ✅");
+  })
+  .catch(e=>alert(e.message));
+}
+
+/* AUTH STATE */
+auth.onAuthStateChanged(user=>{
+ if(user){
+   document.getElementById("loginPage").style.display="none";
+   document.getElementById("site").style.display="block";
+ }
+});
+
+/* LOGOUT */
+function logout(){
+ auth.signOut().then(()=>location.reload());
+}
+
+/* PACKAGE DATA */
+const data=[
+{name:"Maldives Escape",price:"₹75,000"},
+{name:"Paris Delight",price:"₹82,000"},
+{name:"Dubai Luxury",price:"₹68,000"},
+{name:"Thailand Fun",price:"₹55,000"},
+{name:"Singapore Trip",price:"₹72,000"},
+{name:"Bali Retreat",price:"₹70,000"},
+{name:"Switzerland Tour",price:"₹95,000"}
+];
+
+data.forEach(p=>{
+ document.getElementById("packages").innerHTML+=`
+ <div class="card">
+  <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470">
+  <div>
+   <h3>${p.name}</h3>
+   <div class="price">${p.price}</div>
+   <input type="date" id="date-${p.name}">
+   <button onclick="book('${p.name}')">Book Now</button>
+  </div>
+ </div>`;
+});
+
+/* BOOKING SAVE */
+function book(name){
+ let date=document.getElementById("date-"+name).value;
+ if(!date) return alert("Select travel date");
+
+ db.collection("bookings").add({
+   package:name,
+   date:date,
+   user:auth.currentUser.email,
+   createdAt:firebase.firestore.FieldValue.serverTimestamp()
+ })
+ .then(()=>alert("Booking Saved ✅"))
+ .catch(e=>alert(e.message));
+}
+</script>
+
 </body>
 </html>
