@@ -26,7 +26,7 @@
         .hero-slide.active { opacity: 0.4; animation: zoomIn 6s infinite alternate; }
         @keyframes zoomIn { from { transform: scale(1); } to { transform: scale(1.15); } }
 
-        /* Unique Popup Styling */
+        /* Unique Popup Animation */
         .unique-popup-content { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
@@ -40,7 +40,10 @@
     </div>
 
     <nav class="fixed w-full z-[100] bg-black/50 backdrop-blur-md px-8 py-4 flex justify-between items-center border-b border-white/5">
-        <h1 class="text-2xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">TRAVEL MATE</h1>
+        <div class="flex items-center space-x-3">
+            <img src="001 (1).png" alt="Logo" class="h-10 w-10 object-contain">
+            <h1 class="text-2xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">TRAVEL MATE</h1>
+        </div>
         <div class="flex items-center space-x-6 text-[10px] font-bold tracking-widest uppercase">
             <button onclick="showAdmin()" class="admin-only text-emerald-400 border border-emerald-400/20 px-3 py-1 rounded">Admin</button>
             <span id="user-display" class="text-blue-300 hidden"></span>
@@ -64,11 +67,34 @@
             </table>
         </section>
 
+        <section id="write-review" class="hidden glass-card rounded-[40px] p-10 mb-20 max-w-2xl mx-auto border-emerald-500/20">
+            <h3 class="text-xl font-bold mb-4 text-center">Share Your Experience</h3>
+            <textarea id="review-text" placeholder="How was your trip?" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl mb-4 text-white outline-none focus:border-blue-500 h-32"></textarea>
+            <button onclick="window.submitReview()" class="w-full btn-premium py-4 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Post Journal Entry</button>
+        </section>
+
         <section id="reviews" class="py-20 border-t border-white/5">
-            <h3 class="text-3xl font-bold mb-12 text-center">Journal</h3>
+            <h3 class="text-3xl font-bold mb-12 text-center">Voyager Journal</h3>
             <div id="review-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </section>
     </main>
+
+    <footer class="border-t border-white/5 bg-black/20 backdrop-blur-lg py-12 mt-20">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center space-x-3 opacity-70">
+                <img src="001 (1).png" alt="Logo" class="h-6 w-6">
+                <span class="text-xs font-bold tracking-[0.3em] uppercase">Travel Mate</span>
+            </div>
+            <div class="text-center">
+                <p class="text-blue-400 font-bold text-sm tracking-widest">Travelmate@gmail.com</p>
+                <p class="text-[10px] text-gray-500 uppercase mt-2">© 2026 Travel Mate Boutique. All Rights Reserved.</p>
+            </div>
+            <div class="flex space-x-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <a href="#" class="hover:text-white transition">Privacy</a>
+                <a href="#" class="hover:text-white transition">Terms</a>
+            </div>
+        </div>
+    </footer>
 
     <div id="unique-popup" class="modal-hidden fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
         <div class="unique-popup-content glass-card p-10 rounded-[40px] text-center max-w-sm border-emerald-500/30">
@@ -82,8 +108,8 @@
     <section id="admin-view" class="hidden max-w-7xl mx-auto px-6 py-40">
         <h2 class="text-4xl font-black italic mb-10">CONTROL TOWER</h2>
         <div class="glass-card p-8 rounded-3xl max-w-xl">
-            <h3 class="text-blue-400 font-bold mb-6 text-xs uppercase tracking-widest">Feedback Management</h3>
-            <div id="admin-rev-list" class="space-y-4"></div>
+            <h3 class="text-blue-400 font-bold mb-6 text-xs uppercase tracking-widest">Live Feedbacks</h3>
+            <div id="admin-rev-list" class="space-y-4 divide-y divide-white/5"></div>
             <button onclick="hideAdmin()" class="mt-8 text-xs text-gray-500 uppercase">Back to Website</button>
         </div>
     </section>
@@ -101,7 +127,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Verified Config
         const firebaseConfig = {
             apiKey: "AIzaSyBe9PPyqfs9Th7AGumhvT0u0fBW2e7__K8",
             authDomain: "travelmate-7c433.firebaseapp.com",
@@ -114,7 +139,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Extended 15 Packages
         const packages = [
             { id: 1, name: "Midnight Paris", price: "$1,200", img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400" },
             { id: 2, name: "Zen Bali", price: "$850", img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400" },
@@ -126,16 +150,18 @@
             { id: 8, name: "Cairo Pyramids", price: "$780", img: "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?w=400" },
             { id: 9, name: "Iceland Aurora", price: "$2,400", img: "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=400" },
             { id: 10, name: "London Mist", price: "$1,350", img: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400" },
-            { id: 11, name: "Venice Canals", price: "$1,600", img: "https://images.unsplash.com/photo-1514890547357-a9ee2887ad8e?w=800" },
+            { id: 11, name: "Venice Canals", price: "$1,600", img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400" },
             { id: 12, name: "Dubai Desert", price: "$1,900", img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400" },
             { id: 13, name: "Morocco Souks", price: "$1,150", img: "https://images.unsplash.com/photo-1539020140153-e479b8c22e70?w=400" },
             { id: 14, name: "Sydney Opera", price: "$2,000", img: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=400" },
             { id: 15, name: "Rio Carnival", price: "$1,750", img: "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=400" }
         ];
 
-        let reviews = [{ id: 1, name: "Liyash", text: "Amazing passwordless experience!" }];
+        let reviews = [
+            { id: 1, name: "Liyash", text: "Amazing passwordless experience!" },
+            { id: 2, name: "Aditi", text: "Beautiful interface and lightning fast booking." }
+        ];
 
-        // Hero Slider Logic
         let currentSlide = 0;
         const slides = document.querySelectorAll('.hero-slide');
         setInterval(() => {
@@ -144,7 +170,6 @@
             slides[currentSlide].classList.add('active');
         }, 3000);
 
-        // Unique Popup Control
         window.showUniquePopup = (title, msg, icon = "✅") => {
             document.getElementById('popup-title').innerText = title;
             document.getElementById('popup-msg').innerText = msg;
@@ -170,9 +195,38 @@
                     <p class="text-[10px] font-bold text-blue-400 mt-4 uppercase">— ${r.name}</p>
                 </div>
             `).join('');
+
+            // Update Admin Feedback List
+            document.getElementById('admin-rev-list').innerHTML = reviews.map(r => `
+                <div class="py-4 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-blue-300">${r.name}</p>
+                        <p class="text-[10px] text-gray-500">${r.text}</p>
+                    </div>
+                    <button onclick="window.deleteReview(${r.id})" class="text-[8px] text-red-500 uppercase font-bold">Remove</button>
+                </div>
+            `).join('');
         }
 
-        // Firebase Logic
+        window.submitReview = () => {
+            const text = document.getElementById('review-text').value;
+            if(!text) return alert("Please enter your thoughts");
+            const newRev = {
+                id: Date.now(),
+                name: auth.currentUser.email.split('@')[0],
+                text: text
+            };
+            reviews.unshift(newRev); // Add to top
+            document.getElementById('review-text').value = '';
+            showUniquePopup("Feedback Posted!", "Thank you for sharing your experience.", "✍️");
+            render();
+        };
+
+        window.deleteReview = (id) => {
+            reviews = reviews.filter(r => r.id !== id);
+            render();
+        };
+
         document.getElementById('send-link-btn').onclick = async () => {
             const email = document.getElementById('email-input').value;
             if(!email) return alert("Enter email");
@@ -182,7 +236,7 @@
                     handleCodeInApp: true
                 });
                 window.localStorage.setItem('emailForSignIn', email);
-                showUniquePopup("Link Sent!", "Check your inbox to finish logging in.", "📧");
+                showUniquePopup("Link Sent!", "Check your email inbox.", "📧");
                 document.getElementById('login-modal').classList.add('modal-hidden');
             } catch (e) { alert(e.message); }
         };
@@ -192,7 +246,7 @@
             signInWithEmailLink(auth, email, window.location.href).then(() => {
                 window.localStorage.removeItem('emailForSignIn');
                 window.history.replaceState({}, '', window.location.pathname);
-                showUniquePopup("Welcome!", "Login Success! Your journey starts here.", "✨");
+                showUniquePopup("Login Success!", "Welcome to Travel Mate.", "✨");
             });
         }
 
@@ -201,6 +255,7 @@
                 document.getElementById('login-btn').classList.add('hidden');
                 document.getElementById('logout-btn').classList.remove('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
+                document.getElementById('write-review').classList.remove('hidden');
                 document.getElementById('user-display').classList.remove('hidden');
                 document.getElementById('user-display').innerText = user.email;
                 if(user.email === 'admin@travelmate.com') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
@@ -213,23 +268,29 @@
             document.getElementById('history-body').innerHTML += `
                 <tr class="text-sm" id="it-row-${id}">
                     <td class="py-4 font-bold">${name}</td>
-                    <td class="text-blue-400">Confirmed</td>
-                    <td class="text-right">
-                        <button onclick="window.downloadItinerary('${name}')" class="text-emerald-400 text-[10px] font-bold uppercase tracking-tighter">Download</button>
+                    <td class="text-blue-400 font-bold uppercase text-[10px]">Confirmed</td>
+                    <td class="text-right space-x-4">
+                        <button onclick="window.downloadItinerary('${name}')" class="text-emerald-400 text-[10px] font-bold uppercase hover:text-white transition">Download</button>
+                        <button onclick="window.cancelBooking('${id}', '${name}')" class="text-red-400 text-[10px] font-bold uppercase hover:text-white transition">Cancel</button>
                     </td>
                 </tr>
             `;
-            showUniquePopup("Booked!", `${name} has been added to your itineraries.`, "🏝️");
+            showUniquePopup("Booked!", `${name} added to history.`, "🏝️");
+        };
+
+        window.cancelBooking = (id, name) => {
+            document.getElementById(`it-row-${id}`).remove();
+            showUniquePopup("Cancelled", `${name} removed.`, "🛑");
         };
 
         window.downloadItinerary = (name) => {
-            const doc = `TRAVEL MATE - ITINERARY\nDestination: ${name}\nStatus: Confirmed\nSafe travels!`;
+            const doc = `TRAVEL MATE ITINERARY\nDestination: ${name}\nStatus: Confirmed`;
             const blob = new Blob([doc], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `${name}_Itinerary.txt`;
+            link.download = `TravelMate_${name}.txt`;
             link.click();
-            showUniquePopup("Downloaded!", `Your ${name} itinerary is ready to open.`, "📁");
+            showUniquePopup("Downloaded!", `Itinerary for ${name} is ready.`, "📁");
         };
 
         document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
