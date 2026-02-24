@@ -1,180 +1,279 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>TRAVEL_MATE</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAVEL MATE | Explore. Dream. Discover</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth;
+            background: linear-gradient(-45deg, #020617, #0f172a, #1e1b4b, #020617);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: #f8fafc;
+            min-height: 100vh;
+        }
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#000;color:#fff}
-.login-page{
- min-height:100vh;
- background:url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1800&q=80") center/cover no-repeat;
- display:flex;align-items:center;justify-content:center;
-}
-.login-card{
- background:rgba(0,0,0,.8);
- width:360px;padding:30px;border-radius:18px;text-align:center;
-}
-.logo{font-size:32px;font-weight:900;color:#facc15}
-.logo span{color:#38bdf8}
-input{width:100%;padding:12px;margin:8px 0;border:none;border-radius:8px}
-button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:25px;
- background:#facc15;font-weight:700;cursor:pointer}
-#site{display:none}
-nav{
- background:#020617;padding:16px 30px;
- display:flex;justify-content:space-between;align-items:center
-}
-nav ul{list-style:none;display:flex;gap:25px}
-.section{max-width:1200px;margin:auto;padding:60px 20px}
-.packages{
- display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:25px
-}
-.card{
- background:#020617;border-radius:16px;overflow:hidden;
- transition:.3s
-}
-.card:hover{transform:translateY(-6px)}
-.card img{width:100%;height:180px;object-fit:cover}
-.card div{padding:16px}
-.price{color:#facc15;font-weight:700}
-</style>
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .nav-glass {
+            background: rgba(2, 6, 23, 0.7);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-hidden { display: none !important; }
+        .admin-only { display: none; }
+        
+        /* Custom UI Accents */
+        .btn-premium {
+            background: linear-gradient(90deg, #3b82f6, #2dd4bf);
+            transition: opacity 0.3s;
+        }
+        .btn-premium:hover { opacity: 0.9; }
+    </style>
 </head>
-
 <body>
 
-<div class="login-page" id="loginPage">
- <div class="login-card">
-  <div class="logo">Travel <span>Mate</span></div>
-  <h2>Email OTP Login</h2>
-  <input id="email" placeholder="Enter Email">
-  <button onclick="sendOTP()">Send Login Link</button>
- </div>
-</div>
+    <nav class="fixed w-full z-[100] nav-glass px-8 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+            TRAVEL MATE
+        </h1>
+        <div class="flex items-center space-x-8 text-xs font-bold tracking-widest">
+            <a href="#packages" class="hover:text-blue-400 transition">EXPLORE</a>
+            <a href="#reviews" class="hover:text-blue-400 transition">FEEDBACK</a>
+            <button id="admin-nav-link" onclick="showAdmin()" class="admin-only text-emerald-400 border border-emerald-400/20 px-4 py-1 rounded">ADMIN</button>
+            <button id="login-btn" onclick="openLogin()" class="btn-premium text-white px-6 py-2 rounded-full">LOGIN</button>
+            <button id="logout-btn" onclick="handleLogout()" class="hidden text-red-400 border border-red-400/20 px-6 py-2 rounded-full hover:bg-red-400/10">LOGOUT</button>
+        </div>
+    </nav>
 
-<div id="site">
-<nav>
- <div class="logo">Travel <span>Mate</span></div>
- <ul>
-  <li onclick="logout()" style="cursor:pointer">Logout</li>
- </ul>
-</nav>
+    <header id="hero" class="pt-52 pb-32 px-6 text-center">
+        <h2 class="text-6xl md:text-8xl font-extrabold mb-6 tracking-tight leading-none">Explore. <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">Dream.</span> Discover</h2>
+        <p class="text-blue-200/40 text-lg max-w-xl mx-auto font-light">The definitive collection of luxury travel experiences.</p>
+    </header>
 
-<div class="section">
- <h2>Packages</h2><br>
- <div class="packages" id="packages"></div>
-</div>
-</div>
+    <main id="user-view">
+        <section id="packages" class="max-w-7xl mx-auto px-6 py-10">
+            <h3 class="text-xs font-bold tracking-[0.3em] text-blue-500 uppercase mb-10">Signature Collections</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="package-grid"></div>
+        </section>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+        <section id="dashboard" class="hidden max-w-7xl mx-auto px-6 py-20">
+            <div class="glass-card rounded-[40px] p-10">
+                <h3 class="text-3xl font-bold mb-8">Personal Itineraries</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="text-gray-500 text-[10px] tracking-widest uppercase">
+                            <tr><th class="pb-6">Destination</th><th class="pb-6">Status</th><th class="pb-6 text-right">Actions</th></tr>
+                        </thead>
+                        <tbody id="history-body" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBe9PPyqfs9Th7AGumhvT0u0fBW2e7__K8",
-  authDomain: "travelmate-7c433.firebaseapp.com",
-  projectId: "travelmate-7c433",
-  storageBucket: "travelmate-7c433.firebasestorage.app",
-  messagingSenderId: "452266842172",
-  appId: "1:452266842172:web:a93a82e3d3c3b87447cb39"
-};
+        <section id="reviews" class="max-w-7xl mx-auto px-6 py-20">
+            <h3 class="text-center text-3xl font-bold mb-16">Traveler Journal</h3>
+            <div id="review-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16"></div>
+            
+            <div class="glass-card max-w-xl mx-auto p-10 rounded-[32px]">
+                <h4 class="text-lg font-bold mb-6">Contribute a Review</h4>
+                <div class="space-y-4">
+                    <input type="text" id="rev-name" placeholder="Name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:border-blue-500 outline-none transition">
+                    <textarea id="rev-text" rows="3" placeholder="Share your story..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl focus:border-blue-500 outline-none transition"></textarea>
+                    <button onclick="submitReview()" class="w-full btn-premium text-white font-bold py-4 rounded-xl">Post to Journal</button>
+                </div>
+            </div>
+        </section>
+    </main>
 
-firebase.initializeApp(firebaseConfig);
+    <section id="admin-view" class="hidden max-w-7xl mx-auto px-6 py-40">
+        <div class="flex justify-between items-center mb-12">
+            <h2 class="text-4xl font-black italic">CONTROL TOWER</h2>
+            <button onclick="hideAdmin()" class="text-xs tracking-widest border border-white/20 px-6 py-2 rounded hover:bg-white/5">EXIT SYSTEM</button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card p-8 rounded-3xl">
+                <h3 class="font-bold text-blue-400 mb-6 uppercase tracking-widest text-xs">Active Inventory</h3>
+                <div id="admin-package-list" class="space-y-3"></div>
+            </div>
+            <div class="glass-card p-8 rounded-3xl">
+                <h3 class="font-bold text-emerald-400 mb-6 uppercase tracking-widest text-xs">Global Feedback</h3>
+                <div id="admin-review-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </section>
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+    <div id="login-modal" class="modal-hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-xl">
+        <div class="glass-card p-12 rounded-[48px] max-w-md w-full border-white/10">
+            <h2 class="text-3xl font-bold mb-2">Secure Access</h2>
+            <p class="text-blue-200/30 mb-8 text-sm uppercase tracking-widest">Passwordless Entry</p>
+            <input type="email" id="login-email" placeholder="voyager@travelmate.com" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl mb-6 focus:border-blue-500 outline-none">
+            <button onclick="handleLogin()" class="w-full btn-premium text-white py-5 rounded-2xl font-bold shadow-2xl shadow-blue-500/20">SEND MAGIC LINK</button>
+            <button onclick="closeModals()" class="w-full mt-6 text-gray-500 text-xs tracking-widest">DISMISS</button>
+        </div>
+    </div>
 
-/* EMAIL LINK SETTINGS */
-const actionCodeSettings = {
-  url: "https://liyash38.github.io/TRAVEL__mate/",
+    <div id="detail-modal" class="modal-hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4">
+        <div class="glass-card rounded-[48px] max-w-3xl w-full overflow-hidden border-white/10">
+            <div id="modal-body"></div>
+            <div class="p-10 flex justify-end gap-6 bg-white/5 border-t border-white/5">
+                <button onclick="closeModals()" class="text-gray-500 font-bold text-sm">CLOSE</button>
+                <button id="confirm-btn" class="btn-premium px-10 py-4 rounded-2xl font-bold text-sm">CONFIRM RESERVATION</button>
+            </div>
+        </div>
+    </div>
 
-  handleCodeInApp: true
-};
+    <script>
+        let packages = [
+            { id: 1, name: "Midnight Paris", price: "$1,200", img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600" },
+            { id: 2, name: "Zen Ubud", price: "$850", img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600" },
+            { id: 3, name: "Cyberpunk Tokyo", price: "$1,500", img: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=600" },
+            { id: 4, name: "Aegean Dream", price: "$1,100", img: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=600" },
+            { id: 5, name: "Saint Moritz", price: "$2,200", img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600" },
+            { id: 6, name: "Safari Noir", price: "$3,000", img: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=600" },
+            { id: 7, name: "Empire Suite", price: "$900", img: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=600" },
+            { id: 8, name: "Solaris Cairo", price: "$750", img: "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=600" }
+        ];
 
-/* SEND LOGIN LINK */
-function sendOTP(){
-  const email = document.getElementById("email").value;
+        let reviews = [{ name: "Marcus Thorne", text: "The Tokyo experience felt like stepping into the future. Seamless booking." }];
+        let userLoggedIn = false;
+        let isAdmin = false;
 
-  auth.sendSignInLinkToEmail(email, actionCodeSettings)
-  .then(()=>{
-    localStorage.setItem("emailForSignIn", email);
-    alert("Login link sent to your email 📩");
-  })
-  .catch(e=>alert(e.message));
-}
+        function render() {
+            document.getElementById('package-grid').innerHTML = packages.map(p => `
+                <div onclick="openDetails(${p.id})" class="glass-card rounded-[32px] overflow-hidden cursor-pointer group">
+                    <div class="h-48 overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700"></div>
+                    <div class="p-6"><h4 class="text-sm font-bold tracking-tight">${p.name}</h4><p class="text-emerald-400 text-xs font-bold mt-1">${p.price}</p></div>
+                </div>
+            `).join('');
 
-/* COMPLETE SIGN IN */
-if(auth.isSignInWithEmailLink(window.location.href)){
-  let email = localStorage.getItem("emailForSignIn");
+            document.getElementById('review-grid').innerHTML = reviews.map(r => `
+                <div class="glass-card p-8 rounded-3xl">
+                    <p class="text-blue-200/50 italic text-sm leading-relaxed">"${r.text}"</p>
+                    <p class="font-bold text-[10px] mt-6 tracking-widest uppercase text-blue-400">— ${r.name}</p>
+                </div>
+            `).join('');
 
-  if(!email){
-    email = prompt("Confirm your email");
-  }
+            document.getElementById('admin-package-list').innerHTML = packages.map(p => `
+                <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/5 text-xs">
+                    <span>${p.name}</span>
+                    <button onclick="deletePackage(${p.id})" class="text-red-500 font-bold uppercase tracking-widest">Delete</button>
+                </div>
+            `).join('');
 
-  auth.signInWithEmailLink(email, window.location.href)
-  .then(()=>{
-    localStorage.removeItem("emailForSignIn");
-    alert("Login Successful ✅");
-  })
-  .catch(e=>alert(e.message));
-}
+            document.getElementById('admin-review-list').innerHTML = reviews.map((r, i) => `
+                <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/5 text-[10px]">
+                    <span class="opacity-60 italic">"${r.text.substring(0,40)}..."</span>
+                    <button onclick="deleteReview(${i})" class="text-red-500 font-bold uppercase tracking-widest ml-4">Remove</button>
+                </div>
+            `).join('');
+        }
 
-/* AUTH STATE */
-auth.onAuthStateChanged(user=>{
- if(user){
-   document.getElementById("loginPage").style.display="none";
-   document.getElementById("site").style.display="block";
- }
-});
+        function openLogin() { document.getElementById('login-modal').classList.remove('modal-hidden'); }
+        function closeModals() { document.querySelectorAll('[id$="-modal"]').forEach(m => m.classList.add('modal-hidden')); }
 
-/* LOGOUT */
-function logout(){
- auth.signOut().then(()=>location.reload());
-}
+        function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            if(!email) return;
+            userLoggedIn = true;
+            if(email === 'admin@travelmate.com') {
+                isAdmin = true;
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            }
+            document.getElementById('login-btn').classList.add('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            closeModals();
+        }
 
-/* PACKAGE DATA */
-const data=[
-{name:"Maldives Escape",price:"₹75,000"},
-{name:"Paris Delight",price:"₹82,000"},
-{name:"Dubai Luxury",price:"₹68,000"},
-{name:"Thailand Fun",price:"₹55,000"},
-{name:"Singapore Trip",price:"₹72,000"},
-{name:"Bali Retreat",price:"₹70,000"},
-{name:"Switzerland Tour",price:"₹95,000"}
-];
+        function handleLogout() { location.reload(); }
 
-data.forEach(p=>{
- document.getElementById("packages").innerHTML+=`
- <div class="card">
-  <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470">
-  <div>
-   <h3>${p.name}</h3>
-   <div class="price">${p.price}</div>
-   <input type="date" id="date-${p.name}">
-   <button onclick="book('${p.name}')">Book Now</button>
-  </div>
- </div>`;
-});
+        function openDetails(id) {
+            const p = packages.find(pkg => pkg.id === id);
+            document.getElementById('modal-body').innerHTML = `
+                <img src="${p.img}" class="w-full h-80 object-cover">
+                <div class="p-10">
+                    <h2 class="text-4xl font-extrabold mb-2">${p.name}</h2>
+                    <p class="text-emerald-400 text-2xl font-bold mb-6">${p.price}</p>
+                    <p class="text-blue-100/40 leading-relaxed">Ultra-luxury itinerary including private jet transfers, Michelin-starred dining, and 24/7 concierge service.</p>
+                </div>
+            `;
+            document.getElementById('confirm-btn').onclick = () => bookPackage(p.name);
+            document.getElementById('detail-modal').classList.remove('modal-hidden');
+        }
 
-/* BOOKING SAVE */
-function book(name){
- let date=document.getElementById("date-"+name).value;
- if(!date) return alert("Select travel date");
+        function bookPackage(name) {
+            if(!userLoggedIn) return alert("Security: Login required to book.");
+            const id = Date.now();
+            document.getElementById('history-body').innerHTML += `
+                <tr id="book-${id}" class="group">
+                    <td class="py-6 text-sm font-semibold">${name}</td>
+                    <td class="py-6"><span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-bold uppercase">Active</span></td>
+                    <td class="py-6 text-right">
+                        <button onclick="downloadItinerary('${name}')" class="text-blue-400 text-xs font-bold mr-4 hover:underline uppercase tracking-tighter">Itinerary</button>
+                        <button onclick="document.getElementById('book-${id}').remove()" class="text-red-400 text-xs font-bold hover:underline uppercase tracking-tighter">Cancel</button>
+                    </td>
+                </tr>`;
+            closeModals();
+        }
 
- db.collection("bookings").add({
-   package:name,
-   date:date,
-   user:auth.currentUser.email,
-   createdAt:firebase.firestore.FieldValue.serverTimestamp()
- })
- .then(()=>alert("Booking Saved ✅"))
- .catch(e=>alert(e.message));
-}
-</script>
+        function downloadItinerary(name) {
+            const text = `TRAVEL MATE OFFICIAL ITINERARY\n\nDestination: ${name}\nStatus: Confirmed\n\nDay 1: Arrival & Private Concierge Meet\nDay 2: Luxury City Exploration\nDay 3: Signature Cultural Immersion\nDay 4-6: Leisure & Discovery\nDay 7: Farewell Gala & Departure\n\nThank you for choosing Travel Mate.`;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.download = `${name.replace(' ', '_')}_Itinerary.txt`;
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+        }
 
+        function submitReview() {
+            const name = document.getElementById('rev-name').value;
+            const text = document.getElementById('rev-text').value;
+            if(name && text) {
+                reviews.push({ name, text });
+                render();
+                document.getElementById('rev-name').value = "";
+                document.getElementById('rev-text').value = "";
+            }
+        }
+
+        function showAdmin() {
+            document.getElementById('user-view').classList.add('hidden');
+            document.getElementById('hero').classList.add('hidden');
+            document.getElementById('admin-view').classList.remove('hidden');
+        }
+        function hideAdmin() {
+            document.getElementById('user-view').classList.remove('hidden');
+            document.getElementById('hero').classList.remove('hidden');
+            document.getElementById('admin-view').classList.add('hidden');
+        }
+        function deletePackage(id) { packages = packages.filter(p => p.id !== id); render(); }
+        function deleteReview(index) { reviews.splice(index, 1); render(); }
+
+        render();
+    </script>
 </body>
 </html>
