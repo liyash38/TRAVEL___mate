@@ -1,174 +1,370 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRAVEL MATE | Explore. Dream. Discover</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-body{font-family:sans-serif;background:#020617;color:#f8fafc}
-.glass-card{background:rgba(255,255,255,0.03);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.08)}
-.modal-hidden{display:none!important}
-.btn-premium{background:linear-gradient(90deg,#3b82f6,#2dd4bf)}
-.admin-only{display:none}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAVEL MATE | Explore. Dream. Discover</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; min-height: 100vh; overflow-x: hidden; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); transition: 0.4s; }
+        .glass-card:hover { border-color: rgba(59, 130, 246, 0.5); transform: translateY(-5px); }
+        .modal-hidden { display: none !important; }
+        .admin-only { display: none; }
+        #login-modal, .unique-popup { z-index: 9999; }
+        .btn-premium { background: linear-gradient(90deg, #3b82f6, #2dd4bf); transition: 0.3s; cursor: pointer; }
+
+        /* Hero Image Slider Animation */
+        .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 700px; z-index: -1; overflow: hidden; }
+        .hero-slide { 
+            position: absolute; width: 100%; height: 100%; 
+            background-size: cover; background-position: center;
+            opacity: 0; transition: opacity 1s ease-in-out;
+            transform: scale(1.1);
+        }
+        .hero-slide.active { opacity: 0.4; animation: zoomIn 6s infinite alternate; }
+        @keyframes zoomIn { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+        /* Unique Popup Animation */
+        .unique-popup-content { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
 </head>
 <body>
 
-<nav class="p-4 flex justify-between bg-black/40">
-<h1 class="font-bold text-xl">TRAVEL MATE</h1>
-<div>
-<button onclick="showAdmin()" class="admin-only text-emerald-400 mr-4">Admin</button>
-<button id="login-btn">Login</button>
-<button id="logout-btn" class="hidden">Logout</button>
+    <div class="hero-bg">
+        <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1600')"></div>
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1506929662133-5702933635fb?w=1600')"></div>
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600')"></div>
+    </div>
+
+    <nav class="fixed w-full z-[100] bg-black/50 backdrop-blur-md px-8 py-4 flex justify-between items-center border-b border-white/5">
+        <div class="flex items-center space-x-3">
+            <img src="001 (1).png" alt="Logo" class="h-10 w-10 object-contain">
+            <h1 class="text-2xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">TRAVEL MATE</h1>
+        </div>
+        <div class="flex items-center space-x-6 text-[10px] font-bold tracking-widest uppercase">
+            <button onclick="showAdmin()" class="admin-only text-emerald-400 border border-emerald-400/20 px-3 py-1 rounded">Admin</button>
+            <span id="user-display" class="text-blue-300 hidden"></span>
+            <button id="login-btn" onclick="document.getElementById('login-modal').classList.remove('modal-hidden')" class="btn-premium px-6 py-2 rounded-full text-white">Login</button>
+            <button id="logout-btn" class="hidden text-red-400 border border-red-400/20 px-6 py-2 rounded-full">Logout</button>
+        </div>
+    </nav>
+
+    <header id="hero" class="pt-52 pb-40 text-center relative">
+        <h2 class="text-6xl md:text-8xl font-extrabold mb-4 tracking-tight leading-none drop-shadow-2xl">Explore. <br><span class="text-blue-500">Dream.</span> Discover</h2>
+        <p class="text-blue-200/50 uppercase tracking-[0.4em] text-sm">Boutique Luxury Travel</p>
+    </header>
+
+    <main id="user-view" class="max-w-7xl mx-auto px-6">
+        <div id="package-grid" class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-20"></div>
+
+        <section id="dashboard" class="hidden glass-card rounded-[40px] p-10 mb-20">
+            <h3 class="text-2xl font-bold mb-8">My Itineraries</h3>
+            <table class="w-full text-left">
+                <tbody id="history-body" class="divide-y divide-white/5"></tbody>
+            </table>
+        </section>
+
+        <section id="write-review" class="hidden glass-card rounded-[40px] p-10 mb-20 max-w-2xl mx-auto border-emerald-500/20">
+            <h3 class="text-xl font-bold mb-4 text-center">Share Your Experience</h3>
+            <textarea id="review-text" placeholder="How was your trip?" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl mb-4 text-white outline-none focus:border-blue-500 h-32"></textarea>
+            <button onclick="window.submitReview()" class="w-full btn-premium py-4 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Post Journal Entry</button>
+        </section>
+
+        <section id="reviews" class="py-20 border-t border-white/5">
+            <h3 class="text-3xl font-bold mb-12 text-center">Voyager Journal</h3>
+            <div id="review-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/5 bg-black/20 backdrop-blur-lg py-12 mt-20">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center space-x-3 opacity-70">
+                <img src="001 (1).png" alt="Logo" class="h-6 w-6">
+                <span class="text-xs font-bold tracking-[0.3em] uppercase">Travel Mate</span>
+            </div>
+            <div class="text-center">
+                <p class="text-blue-400 font-bold text-sm tracking-widest">Travelmate@gmail.com</p>
+                <p class="text-[10px] text-gray-500 uppercase mt-2">© 2026 Travel Mate Boutique. All Rights Reserved.</p>
+            </div>
+            <div class="flex space-x-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <a href="#" class="hover:text-white transition">Privacy</a>
+                <a href="#" class="hover:text-white transition">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="unique-popup" class="modal-hidden fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="unique-popup-content glass-card p-10 rounded-[40px] text-center max-w-sm border-emerald-500/30">
+            <div id="popup-icon" class="text-5xl mb-4">✅</div>
+            <h2 id="popup-title" class="text-2xl font-bold mb-2">Success!</h2>
+            <p id="popup-msg" class="text-gray-400 text-sm mb-6">Action completed successfully.</p>
+            <button onclick="closeUniquePopup()" class="btn-premium px-8 py-3 rounded-xl font-bold uppercase text-xs">Continue</button>
+        </div>
+    </div>
+
+    <section id="admin-view" class="hidden max-w-7xl mx-auto px-6 py-40">
+        <h2 class="text-4xl font-black italic mb-10">CONTROL TOWER</h2>
+        <div class="glass-card p-8 rounded-3xl max-w-xl">
+            <h3 class="text-blue-400 font-bold mb-6 text-xs uppercase tracking-widest">Live Feedbacks</h3>
+            <div id="admin-rev-list" class="space-y-4 divide-y divide-white/5"></div>
+            <button onclick="hideAdmin()" class="mt-8 text-xs text-gray-500 uppercase">Back to Website</button>
+        </div>
+    </section>
+
+    <div id="login-modal" class="modal-hidden fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-xl">
+        <div class="glass-card p-12 rounded-[48px] max-w-md w-full text-center">
+            <h2 class="text-3xl font-bold mb-8">Magic Access</h2>
+            <input type="email" id="email-input" placeholder="email@example.com" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl mb-6 text-white outline-none focus:border-blue-500">
+            <button id="send-link-btn" class="w-full btn-premium py-5 rounded-2xl font-bold text-white uppercase tracking-widest">Send Login Link</button>
+            <button onclick="document.getElementById('login-modal').classList.add('modal-hidden')" class="w-full mt-6 text-gray-500 text-[10px] uppercase">Dismiss</button>
+        </div>
+    </div>
+    <!-- Add Package Modal -->
+<div id="add-package-modal" class="modal-hidden fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-xl">
+    <div class="glass-card p-10 rounded-[40px] max-w-md w-full text-center">
+        <h2 class="text-2xl font-bold mb-6">Add New Package</h2>
+        <input type="text" id="pkg-name" placeholder="Package Name"
+        class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none">
+
+        <input type="text" id="pkg-price" placeholder="Price (ex: $1200)"
+        class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none">
+
+        <input type="text" id="pkg-img" placeholder="Image URL"
+        class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 text-white outline-none">
+
+        <button onclick="addNewPackage()" 
+        class="w-full btn-premium py-3 rounded-xl font-bold uppercase text-xs">
+        Add Package
+        </button>
+
+        <button onclick="closeAddPackageModal()" 
+        class="w-full mt-4 text-gray-500 text-[10px] uppercase">
+        Cancel
+        </button>
+    </div>
 </div>
-</nav>
 
-<div id="user-view" class="p-10">
-<div id="package-grid" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-<div id="admin-view" class="hidden p-10">
-<h2 class="text-2xl mb-6">CONTROL TOWER</h2>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBe9PPyqfs9Th7AGumhvT0u0fBW2e7__K8",
+            authDomain: "travelmate-7c433.firebaseapp.com",
+            projectId: "travelmate-7c433",
+            storageBucket: "travelmate-7c433.firebasestorage.app",
+            messagingSenderId: "452266842172",
+            appId: "1:452266842172:web:a93a82e3d3c3b87447cb39"
+        };
 
-<button onclick="openAddPackageModal()" class="btn-premium px-4 py-2 mb-6">
-Add Package
-</button>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-<button onclick="hideAdmin()">Back</button>
-</div>
+        const packages = [
+            { id: 1, name: "Midnight Paris", price: "$1,200", img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400" },
+            { id: 2, name: "Zen Bali", price: "$850", img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400" },
+            { id: 3, name: "Cyber Tokyo", price: "$1,500", img: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400" },
+            { id: 4, name: "Azure Greece", price: "$1,100", img: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400" },
+            { id: 5, name: "Swiss Alps", price: "$2,100", img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400" },
+            { id: 6, name: "Safari Kenya", price: "$1,800", img: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=400" },
+            { id: 7, name: "NYC Skyline", price: "$950", img: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400" },
+            { id: 8, name: "Cairo Pyramids", price: "$780", img: "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?w=400" },
+            { id: 9, name: "Iceland Aurora", price: "$2,400", img: "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=400" },
+            { id: 10, name: "London Mist", price: "$1,350", img: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400" },
+            { id: 11, name: "Venice Canals", price: "$1,600", img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400" },
+            { id: 12, name: "Dubai Desert", price: "$1,900", img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400" },
+            { id: 13, name: "Morocco Souks", price: "$1,150", img: "https://images.unsplash.com/photo-1539020140153-e479b8c22e70?w=400" },
+            { id: 14, name: "Sydney Opera", price: "$2,000", img: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=400" },
+            { id: 15, name: "Rio Carnival", price: "$1,750", img: "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=400" }
+        ];
 
-<!-- Add Package Modal -->
-<div id="add-package-modal" class="modal-hidden fixed inset-0 flex items-center justify-center bg-black/80">
-<div class="glass-card p-6 w-80">
-<h3 class="mb-4 font-bold">Add Package</h3>
+        let reviews = [
+            { id: 1, name: "Liyash", text: "Amazing passwordless experience!" },
+            { id: 2, name: "Aditi", text: "Beautiful interface and lightning fast booking." }
+        ];
 
-<input id="pkg-name" placeholder="Package Name" class="w-full mb-3 p-2 text-black">
-<input id="pkg-price" placeholder="Price" class="w-full mb-3 p-2 text-black">
-<input id="pkg-img" placeholder="Image URL" class="w-full mb-4 p-2 text-black">
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.hero-slide');
+        setInterval(() => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }, 3000);
 
-<button onclick="addNewPackage()" class="btn-premium w-full py-2 mb-2">Add</button>
-<button onclick="closeAddPackageModal()" class="w-full py-2 bg-gray-500">Cancel</button>
-</div>
-</div>
+        window.showUniquePopup = (title, msg, icon = "✅") => {
+            document.getElementById('popup-title').innerText = title;
+            document.getElementById('popup-msg').innerText = msg;
+            document.getElementById('popup-icon').innerText = icon;
+            document.getElementById('unique-popup').classList.remove('modal-hidden');
+        };
+        window.closeUniquePopup = () => document.getElementById('unique-popup').classList.add('modal-hidden');
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        function render() {
+            document.getElementById('package-grid').innerHTML = packages.map(p => `
+                <div class="glass-card rounded-[32px] overflow-hidden group cursor-pointer" onclick="window.bookPackage('${p.name}')">
+                    <img src="${p.img}" class="h-48 w-full object-cover">
+                    <div class="p-6">
+                        <h4 class="font-bold uppercase tracking-widest text-xs">${p.name}</h4>
+                        <p class="text-blue-400 text-[10px] font-bold mt-2">${p.price} / Total</p>
+                    </div>
+                </div>
+            `).join('');
 
-const firebaseConfig = {
-apiKey: "AIzaSyBe9PPyqfs9Th7AGumhvT0u0fBW2e7__K8",
-authDomain: "travelmate-7c433.firebaseapp.com",
-projectId: "travelmate-7c433",
+            document.getElementById('review-grid').innerHTML = reviews.map(r => `
+                <div class="glass-card p-8 rounded-3xl">
+                    <p class="text-sm italic opacity-60">"${r.text}"</p>
+                    <p class="text-[10px] font-bold text-blue-400 mt-4 uppercase">— ${r.name}</p>
+                </div>
+            `).join('');
+            
+
+            // Update Admin Feedback List
+            document.getElementById('admin-rev-list').innerHTML = reviews.map(r => `
+                <div class="py-4 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-blue-300">${r.name}</p>
+                        <p class="text-[10px] text-gray-500">${r.text}</p>
+                    </div>
+                    <button onclick="window.deleteReview(${r.id})" class="text-[8px] text-red-500 uppercase font-bold">Remove</button>
+                    <button onclick="openAddPackageModal()"class="mb-6 btn-premium px-6 py-3 rounded-xl text-xs uppercase font-bold">Add Package</button>
+                </div>
+            `).join('');
+        }
+
+        window.submitReview = () => {
+            const text = document.getElementById('review-text').value;
+            if(!text) return alert("Please enter your thoughts");
+            const newRev = {
+                id: Date.now(),
+                name: auth.currentUser.email.split('@')[0],
+                text: text
+            };
+            reviews.unshift(newRev); // Add to top
+            document.getElementById('review-text').value = '';
+            showUniquePopup("Feedback Posted!", "Thank you for sharing your experience.", "✍️");
+            render();
+        };
+
+        window.deleteReview = (id) => {
+            reviews = reviews.filter(r => r.id !== id);
+            render();
+        };
+
+        document.getElementById('send-link-btn').onclick = async () => {
+            const email = document.getElementById('email-input').value;
+            if(!email) return alert("Enter email");
+            try {
+                await sendSignInLinkToEmail(auth, email, {
+                    url: 'https://liyash38.github.io/TRAVEL___mate/', 
+                    handleCodeInApp: true
+                });
+                window.localStorage.setItem('emailForSignIn', email);
+                showUniquePopup("Link Sent!", "Check your email inbox.", "📧");
+                document.getElementById('login-modal').classList.add('modal-hidden');
+            } catch (e) { alert(e.message); }
+        };
+
+        if (isSignInWithEmailLink(auth, window.location.href)) {
+            let email = window.localStorage.getItem('emailForSignIn') || window.prompt('Confirm Email:');
+            signInWithEmailLink(auth, email, window.location.href).then(() => {
+                window.localStorage.removeItem('emailForSignIn');
+                window.history.replaceState({}, '', window.location.pathname);
+                showUniquePopup("Login Success!", "Welcome to Travel Mate.", "✨");
+            });
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                document.getElementById('write-review').classList.remove('hidden');
+                document.getElementById('user-display').classList.remove('hidden');
+                document.getElementById('user-display').innerText = user.email;
+                if(user.email === 'admin@travelmate.com') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            }
+        });
+
+        window.bookPackage = (name) => {
+            if(!auth.currentUser) return alert("Please Login First");
+            const id = Date.now();
+            document.getElementById('history-body').innerHTML += `
+                <tr class="text-sm" id="it-row-${id}">
+                    <td class="py-4 font-bold">${name}</td>
+                    <td class="text-blue-400 font-bold uppercase text-[10px]">Confirmed</td>
+                    <td class="text-right space-x-4">
+                        <button onclick="window.downloadItinerary('${name}')" class="text-emerald-400 text-[10px] font-bold uppercase hover:text-white transition">Download</button>
+                        <button onclick="window.cancelBooking('${id}', '${name}')" class="text-red-400 text-[10px] font-bold uppercase hover:text-white transition">Cancel</button>
+                    </td>
+                </tr>
+            `;
+            showUniquePopup("Booked!", `${name} added to history.`, "🏝️");
+        };
+
+        window.cancelBooking = (id, name) => {
+            document.getElementById(`it-row-${id}`).remove();
+            showUniquePopup("Cancelled", `${name} removed.`, "🛑");
+        };
+
+        window.downloadItinerary = (name) => {
+            const doc = `TRAVEL MATE ITINERARY\nDestination: ${name}\nStatus: Confirmed`;
+            const blob = new Blob([doc], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `TravelMate_${name}.txt`;
+            link.click();
+            showUniquePopup("Downloaded!", `Itinerary for ${name} is ready.`, "📁");
+        };
+
+        document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
+        window.showAdmin = () => { document.getElementById('user-view').classList.add('hidden'); document.getElementById('hero').classList.add('hidden'); document.getElementById('admin-view').classList.remove('hidden'); };
+        window.hideAdmin = () => { document.getElementById('user-view').classList.remove('hidden'); document.getElementById('hero').classList.remove('hidden'); document.getElementById('admin-view').classList.add('hidden'); };
+        window.openAddPackageModal = () => {
+    if(auth.currentUser?.email !== 'admin@travelmate.com') {
+        alert("Admin access only");
+        return;
+    }
+    document.getElementById('add-package-modal').classList.remove('modal-hidden');
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-const defaultPackages = [
-{name:"Midnight Paris",price:"$1,200",img:"https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400"},
-{name:"Zen Bali",price:"$850",img:"https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400"},
-{name:"Cyber Tokyo",price:"$1,500",img:"https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400"}
-];
-
-async function loadPackages(){
-const snap = await getDocs(collection(db,"packages"));
-let packages=[];
-snap.forEach(doc=>packages.push(doc.data()));
-
-if(packages.length===0){
-for(let p of defaultPackages){
-await addDoc(collection(db,"packages"),p);
-}
-return loadPackages();
-}
-
-render(packages);
-}
-
-function render(packages){
-document.getElementById("package-grid").innerHTML =
-packages.map(p=>`
-<div class="glass-card p-4">
-<img src="${p.img}" class="h-40 w-full object-cover mb-3">
-<h4>${p.name}</h4>
-<p>${p.price}</p>
-</div>
-`).join("");
-}
-
-window.openAddPackageModal=()=>{
-if(auth.currentUser?.email!=="admin@travelmate.com"){
-alert("Admin only");return;
-}
-document.getElementById("add-package-modal").classList.remove("modal-hidden");
+window.closeAddPackageModal = () => {
+    document.getElementById('add-package-modal').classList.add('modal-hidden');
 };
 
-window.closeAddPackageModal=()=>{
-document.getElementById("add-package-modal").classList.add("modal-hidden");
+window.addNewPackage = () => {
+    if(auth.currentUser?.email !== 'admin@travelmate.com') {
+        alert("Admin access only");
+        return;
+    }
+
+    const name = document.getElementById('pkg-name').value;
+    const price = document.getElementById('pkg-price').value;
+    const img = document.getElementById('pkg-img').value;
+
+    if(!name || !price || !img) {
+        alert("Fill all fields");
+        return;
+    }
+
+    packages.push({
+        id: Date.now(),
+        name: name,
+        price: price,
+        img: img
+    });
+
+    closeAddPackageModal();
+    render();
+    showUniquePopup("Package Added!", `${name} is now live.`, "🚀");
+
+    document.getElementById('pkg-name').value = '';
+    document.getElementById('pkg-price').value = '';
+    document.getElementById('pkg-img').value = '';
 };
-
-window.addNewPackage=async()=>{
-if(auth.currentUser?.email!=="admin@travelmate.com"){
-alert("Admin only");return;
-}
-const name=document.getElementById("pkg-name").value;
-const price=document.getElementById("pkg-price").value;
-const img=document.getElementById("pkg-img").value;
-
-if(!name||!price||!img){alert("Fill all");return;}
-
-await addDoc(collection(db,"packages"),{name,price,img});
-
-closeAddPackageModal();
-loadPackages();
-};
-
-document.getElementById("login-btn").onclick=async()=>{
-const email=prompt("Enter email");
-await sendSignInLinkToEmail(auth,email,{
-url:window.location.href,
-handleCodeInApp:true
-});
-localStorage.setItem("emailForSignIn",email);
-alert("Check your mail");
-};
-
-if(isSignInWithEmailLink(auth,window.location.href)){
-let email=localStorage.getItem("emailForSignIn");
-await signInWithEmailLink(auth,email,window.location.href);
-localStorage.removeItem("emailForSignIn");
-alert("Login success");
-}
-
-onAuthStateChanged(auth,(user)=>{
-if(user){
-document.getElementById("login-btn").classList.add("hidden");
-document.getElementById("logout-btn").classList.remove("hidden");
-if(user.email==="admin@travelmate.com"){
-document.querySelectorAll(".admin-only").forEach(el=>el.style.display="inline-block");
-}
-}else{
-document.getElementById("login-btn").classList.remove("hidden");
-document.getElementById("logout-btn").classList.add("hidden");
-}
-});
-
-document.getElementById("logout-btn").onclick=()=>signOut(auth);
-
-window.showAdmin=()=>{
-document.getElementById("user-view").classList.add("hidden");
-document.getElementById("admin-view").classList.remove("hidden");
-};
-window.hideAdmin=()=>{
-document.getElementById("user-view").classList.remove("hidden");
-document.getElementById("admin-view").classList.add("hidden");
-};
-
-loadPackages();
-</script>
-
+        render();
+    </script>
 </body>
 </html>
